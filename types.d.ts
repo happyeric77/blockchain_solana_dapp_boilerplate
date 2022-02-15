@@ -62,7 +62,6 @@ declare global {
 
     interface TokenListProps {
         showTokenList: boolean;
-        // toggleTokenList: (event?: React.MouseEvent<HTMLDivElement>) => void;
         toggleTokenList: (type: "From" | "To" | undefined) => void;
         getTokenInfo: Function;
     }

@@ -2,7 +2,6 @@ import { FunctionComponent, useEffect, useRef, useState } from "react";
 import { CloseIcon } from "@chakra-ui/icons";
 import SPLTokenRegistrySource from "../../utils/tokenList";
 import { TOKENS } from "../../utils/tokens";
-// import { ITokenInfo } from ".";
 import style from "../../styles/swap.module.sass";
 
 const TokenList: FunctionComponent<TokenListProps> = props => {
@@ -43,14 +42,7 @@ const TokenList: FunctionComponent<TokenListProps> = props => {
     props.getTokenInfo(item);
     props.toggleTokenList("From");
   };
-
-  // useEffect(() => {
-  //   if (!props.showTokenList) {
-  //     setSearchList(initialList);
-  //     searchRef.current.value = "";
-  //   }
-  // }, [props.showTokenList]);
-
+  
   const listItems = (data: ITokenInfo[]) => {
     return data.map((item: ITokenInfo) => {
       return (
@@ -74,7 +66,6 @@ const TokenList: FunctionComponent<TokenListProps> = props => {
         newList.push(item);
       }
     });
-    // setSearchList(() => newList);
     setSearchList(newList);
   };
 
