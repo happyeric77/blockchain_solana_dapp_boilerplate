@@ -1,34 +1,13 @@
 import { useState, useEffect, FunctionComponent } from "react";
-// import TokenList from "./TokenList";
-// import TitleRow from "./TitleRow";
-// import SlippageSetting from "./SlippageSetting";
-// import SwapOperateContainer from "./SwapOperateContainer";
-import { PublicKey, Connection } from "@solana/web3.js";
-import { Spinner } from "@chakra-ui/react";
-import { useWallet, WalletContextState } from "@solana/wallet-adapter-react";
+// import { PublicKey, Connection } from "@solana/web3.js";
+// import { Spinner } from "@chakra-ui/react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { getPoolByTokenMintAddresses } from "../../utils/pools";
 import { swap, getSwapOutAmount, setupPools } from "../../utils/swap";
 import { getSPLTokenData } from "../../utils/web3";
 import useDapp from "../../hooks/useDapp";
 import TokenList from "./TokenList";
-import TokenSelect from "./TokenSelect";
 import SwapOperateContainer from "./SwapOperateContainer";
-// import Notify from "../commons/Notify";
-// import { INotify } from "../commons/Notify";
-// import SplTokenList from "../commons/SplTokenList";
-// import { ISplToken } from "../../utils/web3";
-// import { IUpdateAmountData } from "./TokenSelect";
-// import style from "../../styles/swap.module.sass";
-
-// export interface ITokenInfo {
-//   symbol: string;
-//   mintAddress: string;
-//   logoURI: string;
-// }
-// export interface TokenData {
-//   amount: number | null;
-//   tokenInfo: ITokenInfo;
-// }
 
 const SwapPage: FunctionComponent = () => {
                                                                               // React Hooks
@@ -129,14 +108,6 @@ const SwapPage: FunctionComponent = () => {
   useEffect(() => {                                                         // Update SwapOut Amount when there is change of src or dist coins or slippage 
     updateSwapOutAmount();
   }, [fromData, toData.tokenInfo?.symbol, slippageValue]);
-
-  // useEffect(() => {
-  //   updateSwapOutAmount();
-  // }, [toData.tokenInfo?.symbol]);
-
-  // useEffect(() => {
-  //   updateSwapOutAmount();
-  // }, [slippageValue]);
 
   const toggleTokenList = (type: "From"|"To" | undefined) => {                                           /**@Param e: selected type  */
     setShowTokenList(() => !showTokenList);

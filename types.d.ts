@@ -1,3 +1,4 @@
+import { WalletContextState } from "@solana/wallet-adapter-react"
 import { Connection } from "@solana/web3.js"
 
 declare global {
@@ -99,8 +100,8 @@ declare global {
     // Context Types
 
     type DappContextType = {
-        splTokens: ISplToken[] | undefined
-        connection: Connection
+        splTokens: ISplToken[] | undefined,
+        connection: Connection,
     }
 }
 export {}

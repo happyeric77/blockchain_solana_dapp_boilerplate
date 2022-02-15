@@ -3,9 +3,23 @@
 
 This project is inspired by [Dappio swap-ui-example](https://github.com/DappioWonderland/swap-ui-example)
 
-project ongoing ....
-- TODO#1: Add exchange page (Raydium)
+Project is ongoing, keep updating ...
 
-- TODO#2: Add styling using [Chakra](https://chakra-ui.com/docs/form/input)
+- TODO#1: Integrate with Anchor as program backend
 
-- TODO#3: Integrate with Anchor as program backend
+# How to use
+
+1. clone the repo:
+```
+git clone https://github.com/happyeric77/blockchain_solana_dapp_boilerplate.git
+```
+
+2. install npm depandencies:
+```
+npm install
+```
+
+3. run boilerplate on localhost:3000
+```
+npm run dev
+```
