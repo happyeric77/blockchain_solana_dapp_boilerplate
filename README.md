@@ -7,3 +7,5 @@ project ongoing ....
 - TODO#1: Add exchange page (Raydium)
 
 - TODO#2: Add styling using [Chakra](https://chakra-ui.com/docs/form/input)
+
+- TODO#3: Integrate with Anchor as program backend

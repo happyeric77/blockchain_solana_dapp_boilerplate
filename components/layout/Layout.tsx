@@ -44,7 +44,11 @@ function Layout({...props}): JSX.Element {
 
             <Header />
             <DappContext.Provider value={{
-                splTokens: splTokenData
+                splTokens: splTokenData,
+                connection: new Connection("https://rpc-mainnet-fork.dappio.xyz", {
+                    wsEndpoint: "wss://rpc-mainnet-fork.dappio.xyz/ws",
+                    commitment: "processed"
+                })
             }}>
                 <main className={Class.content} >{props.children}</main>
             </DappContext.Provider>

@@ -9,6 +9,8 @@ import { useWallet, WalletContextState } from "@solana/wallet-adapter-react";
 import { getPoolByTokenMintAddresses } from "../../utils/pools";
 import { swap, getSwapOutAmount, setupPools } from "../../utils/swap";
 import { getSPLTokenData } from "../../utils/web3";
+import useDapp from "../../hooks/useDapp";
+import TokenList from "./TokenList";
 // import Notify from "../commons/Notify";
 // import { INotify } from "../commons/Notify";
 // import SplTokenList from "../commons/SplTokenList";
@@ -16,20 +18,21 @@ import { getSPLTokenData } from "../../utils/web3";
 // import { IUpdateAmountData } from "./TokenSelect";
 // import style from "../../styles/swap.module.sass";
 
-export interface ITokenInfo {
-  symbol: string;
-  mintAddress: string;
-  logoURI: string;
-}
-export interface TokenData {
-  amount: number | null;
-  tokenInfo: ITokenInfo;
-}
+// export interface ITokenInfo {
+//   symbol: string;
+//   mintAddress: string;
+//   logoURI: string;
+// }
+// export interface TokenData {
+//   amount: number | null;
+//   tokenInfo: ITokenInfo;
+// }
 
 const SwapPage: FunctionComponent = () => {
+                                                                              // React Hooks
   const [showTokenList, setShowTokenList] = useState(false);
   const [showSlippageSetting, setShowSlippageSetting] = useState(false);
-  const [selectType, setSelectType] = useState<string>("From");
+  const [selectType, setSelectType] = useState<"From" | "To" >("From");
   const [fromData, setFromData] = useState<TokenData>({} as TokenData);
   const [toData, setToData] = useState<TokenData>({} as TokenData);
   const [slippageValue, setSlippageValue] = useState(1);
@@ -43,14 +46,11 @@ const SwapPage: FunctionComponent = () => {
     link: ""
   });
   const [showNotify, toggleNotify] = useState<Boolean>(false);
+                                                                            // Other Hooks
+  let wallet = useWallet();
+  let { connection } = useDapp()
 
-  let wallet: WalletContextState = useWallet();
-  const connection = new Connection("https://rpc-mainnet-fork.dappio.xyz", {
-    wsEndpoint: "wss://rpc-mainnet-fork.dappio.xyz/ws",
-    commitment: "processed"
-  });
-
-  useEffect(() => {
+  useEffect(() => {                                                         // Setup Liquidity Pools
     setIsLoading(true);
     setupPools(connection).then(data => {
       setLiquidityPools(data);
@@ -83,11 +83,13 @@ const SwapPage: FunctionComponent = () => {
       fromData.tokenInfo?.symbol &&
       toData.tokenInfo?.symbol
     ) {
+                                                                              // Get LP info 
       let poolInfo = getPoolByTokenMintAddresses(
         fromData.tokenInfo.mintAddress,
         toData.tokenInfo.mintAddress
       );
-      if (!poolInfo) {                                                  
+
+      if (!poolInfo) {                                                        // If get no LP then trigger notification                          
         setNotify((old: INotify) => ({                                        /** @TODO Manual update pool?? how to get the Liquidity pool in util auto update? */
           ...old,
           status: "error",
@@ -117,24 +119,23 @@ const SwapPage: FunctionComponent = () => {
     }
   };
 
-  useEffect(() => {
+  useEffect(() => {                                                         // Update SwapOut Amount when there is change of src or dist coins or slippage 
     updateSwapOutAmount();
-  }, [fromData]);
+  }, [fromData, toData.tokenInfo?.symbol, slippageValue]);
 
-  useEffect(() => {
-    updateSwapOutAmount();
-  }, [toData.tokenInfo?.symbol]);
+  // useEffect(() => {
+  //   updateSwapOutAmount();
+  // }, [toData.tokenInfo?.symbol]);
 
-  useEffect(() => {
-    updateSwapOutAmount();
-  }, [slippageValue]);
+  // useEffect(() => {
+  //   updateSwapOutAmount();
+  // }, [slippageValue]);
 
-  const toggleTokenList = (e: any) => {
+  const toggleTokenList = () => {                                           /**@Param e: selected type  */
     setShowTokenList(() => !showTokenList);
-    setSelectType(() => e);
   };
 
-  const toggleSlippageSetting = () => {
+  const toggleSlippageSetting = () => {                                     // pop-up slippage selection
     setShowSlippageSetting(() => !showSlippageSetting);
   };
 
@@ -162,8 +163,8 @@ const SwapPage: FunctionComponent = () => {
     }));
   };
 
-  const getTokenInfo = (e: any) => {
-    if (selectType === "From") {
+  const getTokenInfo = (e: ITokenInfo) => {                                // Set src and dist coin when user select
+    if (selectType === "From") {                                           // When user selects src token which is the same as current dist coin
       if (toData.tokenInfo?.symbol === e?.symbol) {
         setToData((old: TokenData) => ({
           ...old,
@@ -179,7 +180,7 @@ const SwapPage: FunctionComponent = () => {
         ...old,
         tokenInfo: e
       }));
-    } else {
+    } else {                                                              // Else when user selects dist token which is the same as current src coin
       if (fromData.tokenInfo?.symbol === e.symbol) {
         setFromData((old: TokenData) => ({
           ...old,
@@ -322,12 +323,13 @@ const SwapPage: FunctionComponent = () => {
   return (
     // <div className={style.swapPage}>
     <div>
-      {/* <SplTokenList splTokenData={splTokenData} />
+      {/* <SplTokenList splTokenData={splTokenData} /> */}
       <TokenList
         showTokenList={showTokenList}
         toggleTokenList={toggleTokenList}
         getTokenInfo={getTokenInfo}
-      /> */}
+      />
+      <button onClick={()=>{toggleTokenList()}}>From</button>
       
     </div>
   );

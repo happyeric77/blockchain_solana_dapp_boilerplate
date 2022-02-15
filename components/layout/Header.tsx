@@ -14,7 +14,7 @@ export default function Header() {
         <div style={{display: "flex", justifyContent: "space-between"}}>
             <Link href="/my_spl">My SPL Tokens</Link>
             <Link href="/">Home</Link>
-            <Link href="/">Exchange</Link>
+            <Link href="/exchange">Exchange</Link>
             <WalletModalProvider>
                 {wallet.connected ? <WalletDisconnectButton /> : <WalletMultiButton />}
             </WalletModalProvider>
