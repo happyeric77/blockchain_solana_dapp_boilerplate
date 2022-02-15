@@ -12,6 +12,7 @@ import { getSPLTokenData } from "../../utils/web3";
 import useDapp from "../../hooks/useDapp";
 import TokenList from "./TokenList";
 import TokenSelect from "./TokenSelect";
+import SwapOperateContainer from "./SwapOperateContainer";
 // import Notify from "../commons/Notify";
 // import { INotify } from "../commons/Notify";
 // import SplTokenList from "../commons/SplTokenList";
@@ -33,7 +34,7 @@ const SwapPage: FunctionComponent = () => {
                                                                               // React Hooks
   const [showTokenList, setShowTokenList] = useState(false);
   const [showSlippageSetting, setShowSlippageSetting] = useState(false);
-  const [selectType, setSelectType] = useState<"From" | "To" >("From");
+  const [selectType, setSelectType] = useState<"From" | "To" | undefined>("From");
   const [fromData, setFromData] = useState<TokenData>({} as TokenData);
   const [toData, setToData] = useState<TokenData>({} as TokenData);
   const [slippageValue, setSlippageValue] = useState(1);
@@ -46,6 +47,7 @@ const SwapPage: FunctionComponent = () => {
     description: "",
     link: ""
   });
+
   const [showNotify, toggleNotify] = useState<Boolean>(false);
                                                                             // Other Hooks
   let wallet = useWallet();
@@ -136,8 +138,9 @@ const SwapPage: FunctionComponent = () => {
   //   updateSwapOutAmount();
   // }, [slippageValue]);
 
-  const toggleTokenList = () => {                                           /**@Param e: selected type  */
+  const toggleTokenList = (type: "From"|"To" | undefined) => {                                           /**@Param e: selected type  */
     setShowTokenList(() => !showTokenList);
+    setSelectType(type)
   };
 
   const toggleSlippageSetting = () => {                                     // pop-up slippage selection
@@ -326,19 +329,20 @@ const SwapPage: FunctionComponent = () => {
   }, [wallet.connected]);
 
   return (
-    // <div className={style.swapPage}>
     <div>
       <TokenList
         showTokenList={showTokenList}
-        toggleTokenList={toggleTokenList}
+        toggleTokenList={() => toggleTokenList(undefined)}
         getTokenInfo={getTokenInfo}
       />
-      <TokenSelect
-        type="From"
+      <SwapOperateContainer
         toggleTokenList={toggleTokenList}
-        tokenData={fromData}
+        fromData={fromData}
+        toData={toData}
         updateAmount={updateAmount}
-        wallet={wallet}
+        switchFromAndTo={switchFromAndTo}
+        slippageValue={slippageValue}
+        sendSwapTransaction={sendSwapTransaction}
         splTokenData={splTokens ? splTokens : []}
       />
       

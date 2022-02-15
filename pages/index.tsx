@@ -5,7 +5,7 @@ import useDapp from '../hooks/useDapp'
 const Home: NextPage = () => {
 
   return <>
-    Home Page Place holder
+    <div>Home Page Placeholder</div>
   </>
 }
 

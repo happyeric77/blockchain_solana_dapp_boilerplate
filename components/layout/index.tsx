@@ -1,5 +1,4 @@
 
-import Class from "./Layout.module.sass"
 import Head from 'next/head'
 import Header from "./Header"
 import { useWallet } from "@solana/wallet-adapter-react"
@@ -40,8 +39,7 @@ function Layout({...props}): JSX.Element {
             <title>Solana DAPP Boilerplate</title>
         </Head>
 
-        <div className={Class.layout} >
-
+        <div  >
             <Header />
             <DappContext.Provider value={{
                 splTokens: splTokenData,
@@ -50,7 +48,7 @@ function Layout({...props}): JSX.Element {
                     commitment: "processed"
                 })
             }}>
-                <main className={Class.content} >{props.children}</main>
+                <main >{props.children}</main>
             </DappContext.Provider>
         </div>
     </>

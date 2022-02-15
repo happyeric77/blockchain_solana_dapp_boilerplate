@@ -58,45 +58,46 @@
 //       padding: .5rem
 //       border-radius: .5rem
 //       font-weight: 600
-// .swapCard
-//   width: 36rem
-//   background: linear-gradient(245.22deg,#da2eef 7.97%,#2b6aff 49.17%,#39d0d8 92.1%)
-//   display: flex
-//   align-items: center
-//   justify-content: center
-//   border-radius: .5rem
-//   padding: .1rem
-// .cardBody
-//   background-color: $swap_card_bgc
-//   border-radius: .5rem
-//   width: 100%
-//   height: 100%
-//   opacity: .9
-//   padding: 3.2rem 1.8rem 3.2rem 1.8rem
-//   display: flex
-//   flex-direction: column
-//   align-items: center
-//   .switchIcon
-//     margin: 1rem 0
-//     width: 3.2rem
-//     height: 3.2rem
-//     background-color: #000829
-//     border-radius: 50%
-//     display: flex
-//     align-items: center
-//     justify-content: center
-//   .icon
-//     cursor: pointer
-//   .lowSOLWarning
-//     font-size: 1.4rem
-//     color: $white
-//     display: flex
-//     align-items: center
-//     justify-content: center
-//     font-weight: 600
-//     padding-top: 1.5rem
-//     .txt
-//       margin-right: 1rem
+.swapCard
+  margin: auto
+  width: 36rem
+  background: linear-gradient(245.22deg,#da2eef 7.97%,#2b6aff 49.17%,#39d0d8 92.1%)
+  display: flex
+  align-items: center
+  justify-content: center
+  border-radius: .5rem
+  padding: .1rem
+.cardBody
+  background-color: $swap_card_bgc
+  border-radius: .5rem
+  width: 100%
+  height: 100%
+  opacity: .9
+  padding: 3.2rem 1.8rem 3.2rem 1.8rem
+  display: flex
+  flex-direction: column
+  align-items: center
+  .switchIcon
+    margin: 1rem 0
+    width: 3.2rem
+    height: 3.2rem
+    background-color: #000829
+    border-radius: 50%
+    display: flex
+    align-items: center
+    justify-content: center
+  .icon
+    cursor: pointer
+  .lowSOLWarning
+    font-size: 1.4rem
+    color: $white
+    display: flex
+    align-items: center
+    justify-content: center
+    font-weight: 600
+    padding-top: 1.5rem
+    .txt
+      margin-right: 1rem
 .coinSelect
   color: $white
   background-color: $coin_select_block_bgc
@@ -154,45 +155,46 @@
       letter-spacing: 1px
     .coinName
       margin-right: .5rem
-// .slippageRow
-//   display: flex
-//   align-items: center
-//   justify-content: space-between
-//   width: 100%
-//   padding: 1rem 1.2rem 0 1.2rem
-//   font-size: 1.2rem
-//   opacity: .75
-//   font-weight: 600
-//   .slippageTooltipBlock
-//     display: flex
-//     align-items: center
-//   .icon
-//     margin-left: 1rem
+.slippageRow
+  color: $white
+  display: flex
+  align-items: center
+  justify-content: space-between
+  width: 100%
+  padding: 1rem 1.2rem 0 1.2rem
+  font-size: 1.2rem
+  opacity: .75
+  font-weight: 600
+  .slippageTooltipBlock
+    display: flex
+    align-items: center
+  .icon
+    margin-left: 1rem
 
-// .operateBtn
-//   width: 100%
-//   height: 4rem
-//   border: solid .1rem $swap_btn_border_color
-//   color: $white
-//   background-color: transparent
-//   border-radius: .4rem
-//   margin-top: 2rem
-//   font-size: 1.6rem
-//   font-weight: 600
-//   &:hover
-//     transition: .5s
-//     color: $swap_btn_border_color
+.operateBtn
+  width: 100%
+  height: 4rem
+  border: solid .1rem $swap_btn_border_color
+  color: $white
+  background-color: transparent
+  border-radius: .4rem
+  margin-top: 2rem
+  font-size: 1.6rem
+  font-weight: 600
+  &:hover
+    transition: .5s
+    color: $swap_btn_border_color
 // .selectWallet
 //   margin-top: 2.5rem
-// .disabledBtn
-//   border-color: $placeholder_grey
-//   opacity: .7
-//   cursor: unset
-//   &:hover
-//     color: $placeholder_grey
+.disabledBtn
+  border-color: $placeholder_grey
+  opacity: .7
+  cursor: unset
+  &:hover
+    color: $placeholder_grey
 
 .tokeListComponent
-  // transition: .3s
+  transition: .3s
   width: 100vw
   height: 100vh
   background-color: rgba(0,0,0,.5)
@@ -223,14 +225,14 @@
     letter-spacing: 1px
     border-bottom: solid .1rem $white
   .list
-    height: calc(100% - 26rem)
+    height: calc(100% - 10rem)
     overflow: scroll
     padding: 0 1.5rem 2rem 1.5rem
   .tokenRow
     display: flex
     align-items: center
     padding: .8rem 1.2rem
-    font-size: 1.6rem
+    font-size: 1.2rem
     cursor: pointer
     &:hover
       background-color: $coin_select_block_bgc
@@ -257,7 +259,7 @@
   .closeIcon
     cursor: pointer
   .inputBlock
-    padding: 1rem 2.5rem 0 2.5rem
+    padding: 0.2rem 2.5rem 0 2.5rem
     .tokenListTitleRow
       font-size: 1.4rem
       font-weight: 600
@@ -266,7 +268,7 @@
       justify-content: space-between
       align-items: center
     .searchTokenInput
-      padding: 1.6rem
+      // padding: 0.5rem
       border: solid .1rem $swap_btn_border_color
       outline: none
       width: 100%

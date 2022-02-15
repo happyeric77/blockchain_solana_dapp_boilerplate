@@ -4,14 +4,14 @@ import {
     WalletMultiButton
 } from "@solana/wallet-adapter-react-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
-import Class from "./Header.module.sass"
 import Link from "next/link";
+import style from "../../styles/header.module.sass"
 
 export default function Header() {
     const wallet = useWallet()
     
     return <>
-        <div style={{display: "flex", justifyContent: "space-between"}}>
+        <div className={style.header} >
             <Link href="/my_spl">My SPL Tokens</Link>
             <Link href="/">Home</Link>
             <Link href="/exchange">Exchange</Link>

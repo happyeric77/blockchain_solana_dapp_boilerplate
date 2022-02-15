@@ -1,53 +1,52 @@
-import { FunctionComponent } from "react";
-// import style from "../../styles/swap.module.sass";
+import { FunctionComponent, useEffect, useState } from "react";
 import { TOKENS } from "../../utils/tokens";
+import style from "../../styles/splTokenList.module.sass"
 
-const SplTokenList: FunctionComponent<ISplTokenProps> = (
-  props
-): JSX.Element => {
-  let tokenList: SplTokenDisplayData[] = [];
-  if (props.splTokenData.length === 0) {
-    return <></>;
-  }
-
-  for (const [_, value] of Object.entries(TOKENS)) {
-    let spl: ISplToken | undefined = props.splTokenData.find(
-      (t: ISplToken) => t.parsedInfo.mint === value.mintAddress
-    );
-    if (spl) {
-      let token = {} as SplTokenDisplayData;
-      token["symbol"] = value.symbol;
-      token["mint"] = spl?.parsedInfo.mint;
-      token["pubkey"] = spl?.pubkey;
-      token["amount"] = spl?.amount;
-      tokenList.push(token);
+const SplTokenList: FunctionComponent<ISplTokenProps> = ( props ): JSX.Element => {
+  const [tokenList, setTokenList] = useState<SplTokenDisplayData[]>([]);
+  
+  useEffect(()=>{
+    console.log("GG")
+    setTokenList(updateTokenList())
+  }, [])
+  
+  function updateTokenList(): SplTokenDisplayData[] {
+    let tokenList = [];
+    for (const [_, value] of Object.entries(TOKENS)) {
+      let spl: ISplToken | undefined = props.splTokenData.find(
+        (t: ISplToken) => t.parsedInfo.mint === value.mintAddress
+      );
+      
+      if (spl) {
+        let token = {} as SplTokenDisplayData;
+        token["symbol"] = value.symbol;
+        token["mint"] = spl?.parsedInfo.mint;
+        token["pubkey"] = spl?.pubkey;
+        token["amount"] = spl?.amount;
+        tokenList.push(token);
+      }
     }
+    return tokenList
   }
-
-  let tokens = tokenList.map((item: SplTokenDisplayData) => {
-    return (
-      // <div key={item.mint} className={style.splTokenItem}>
-      <div key={item.mint} >
-        <div>
-          <span style={{ marginRight: "1rem", fontWeight: "600" }}>
-            {item.symbol}
-          </span>
-          <span>- {item.amount}</span>
-        </div>
-        <div style={{ opacity: ".25" }}>
-          <div>Mint: {item.mint}</div>
-          <div>Pubkey: {item.pubkey}</div>
-        </div>
-      </div>
-    );
-  });
-
+  
   return (
-    // <div className={style.splTokenContainer}>
-    //   <div className={style.splTokenListTitle}>Your Tokens</div>
-    <div >
-      <div >Your Tokens</div>
-      {tokens}
+    <div className={style.splTokenList}>
+      {tokenList.map((item ) => {
+        return (
+          <div key={item.mint} className={style.item}  >
+            <div>
+              <span style={{ marginRight: "1rem", fontWeight: "600" }}>
+                {item.symbol}
+              </span>
+              <span>- {item.amount}</span>
+            </div>
+            <div style={{ opacity: ".25" }}>
+              <div>Mint: {item.mint}</div>
+              <div>Pubkey: {item.pubkey}</div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

@@ -41,7 +41,7 @@ const TokenList: FunctionComponent<TokenListProps> = props => {
 
   const setTokenInfo = (item: ITokenInfo) => {
     props.getTokenInfo(item);
-    props.toggleTokenList();
+    props.toggleTokenList("From");
   };
 
   // useEffect(() => {
@@ -94,7 +94,7 @@ const TokenList: FunctionComponent<TokenListProps> = props => {
       <div className={style.tokeListContainer}>
         <div className={style.header}>
           <div>Select a token</div>
-          <div className={style.closeIcon} onClick={props.toggleTokenList}>
+          <div className={style.closeIcon} onClick={() => props.toggleTokenList(undefined)}>
             <CloseIcon w={5} h={5} />
           </div>
         </div>

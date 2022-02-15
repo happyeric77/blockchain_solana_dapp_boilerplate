@@ -6,7 +6,9 @@ import useDapp from "../hooks/useDapp"
 export default function ExchangePage() {
     const {splTokens} = useDapp()
     return <>
-        Exchange Page Place holder
+    <div style={{padding: "30px"}}>
         <SwapPage />
+    </div>
+        
     </>
 }

@@ -27,7 +27,7 @@ declare global {
     interface IUpdateAmountData {
         type: string;
         amount: number;
-      }
+    }
 
 
     // SPL token
@@ -62,7 +62,7 @@ declare global {
     interface TokenListProps {
         showTokenList: boolean;
         // toggleTokenList: (event?: React.MouseEvent<HTMLDivElement>) => void;
-        toggleTokenList: () => void;
+        toggleTokenList: (type: "From" | "To" | undefined) => void;
         getTokenInfo: Function;
     }
 
@@ -77,6 +77,23 @@ declare global {
 
     interface dropDownTokenListBtnProps {
         tokenData: TokenData;
+    }
+
+    interface SwapOperateContainerProps {
+        toggleTokenList: Function;
+        fromData: TokenData;
+        toData: TokenData;
+        updateAmount: Function;
+        switchFromAndTo: (event?: React.MouseEvent<HTMLDivElement>) => void;
+        slippageValue: number;
+        sendSwapTransaction: (event?: React.MouseEvent<HTMLButtonElement>) => void;
+        splTokenData: ISplToken[];
+    }
+    
+    interface SwapDetailProps {
+        title: string;
+        tooltipContent: string;
+        value: string;
     }
 
     // Context Types
