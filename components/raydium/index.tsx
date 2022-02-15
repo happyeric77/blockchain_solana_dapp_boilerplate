@@ -11,6 +11,7 @@ import { swap, getSwapOutAmount, setupPools } from "../../utils/swap";
 import { getSPLTokenData } from "../../utils/web3";
 import useDapp from "../../hooks/useDapp";
 import TokenList from "./TokenList";
+import TokenSelect from "./TokenSelect";
 // import Notify from "../commons/Notify";
 // import { INotify } from "../commons/Notify";
 // import SplTokenList from "../commons/SplTokenList";
@@ -48,7 +49,11 @@ const SwapPage: FunctionComponent = () => {
   const [showNotify, toggleNotify] = useState<Boolean>(false);
                                                                             // Other Hooks
   let wallet = useWallet();
-  let { connection } = useDapp()
+  let { connection, splTokens } = useDapp()
+
+  useEffect(()=>{
+    splTokens && setSplTokenData(splTokens)
+  }, [splTokens])
 
   useEffect(() => {                                                         // Setup Liquidity Pools
     setIsLoading(true);
@@ -323,13 +328,19 @@ const SwapPage: FunctionComponent = () => {
   return (
     // <div className={style.swapPage}>
     <div>
-      {/* <SplTokenList splTokenData={splTokenData} /> */}
       <TokenList
         showTokenList={showTokenList}
         toggleTokenList={toggleTokenList}
         getTokenInfo={getTokenInfo}
       />
-      <button onClick={()=>{toggleTokenList()}}>From</button>
+      <TokenSelect
+        type="From"
+        toggleTokenList={toggleTokenList}
+        tokenData={fromData}
+        updateAmount={updateAmount}
+        wallet={wallet}
+        splTokenData={splTokens ? splTokens : []}
+      />
       
     </div>
   );

@@ -24,41 +24,10 @@ declare global {
         tokenInfo: ITokenInfo;
     }
 
-
-    interface LiquidityPoolInfo {
-        name: string;
-        coin: TokenInfo;
-        pc: TokenInfo;
-        lp: TokenInfo;
-    
-        version: number;
-        programId: string;
-    
-        ammId: string;
-        ammAuthority: string;
-        ammOpenOrders: string;
-        ammTargetOrders: string;
-        ammQuantities: string;
-    
-        poolCoinTokenAccount: string;
-        poolPcTokenAccount: string;
-        poolWithdrawQueue: string;
-        poolTempLpTokenAccount: string;
-    
-        serumProgramId: string;
-        serumMarket: string;
-        serumBids?: string;
-        serumAsks?: string;
-        serumEventQueue?: string;
-        serumCoinVaultAccount: string;
-        serumPcVaultAccount: string;
-        serumVaultSigner: string;
-    
-        official: boolean;
-    
-        status?: number;
-        currentK?: number;
-    }
+    interface IUpdateAmountData {
+        type: string;
+        amount: number;
+      }
 
 
     // SPL token
@@ -95,6 +64,19 @@ declare global {
         // toggleTokenList: (event?: React.MouseEvent<HTMLDivElement>) => void;
         toggleTokenList: () => void;
         getTokenInfo: Function;
+    }
+
+    interface TokenSelectProps {
+        type: string;
+        toggleTokenList: Function;
+        tokenData: TokenData;
+        updateAmount: Function;
+        wallet: Object;
+        splTokenData: ISplToken[];
+    }
+
+    interface dropDownTokenListBtnProps {
+        tokenData: TokenData;
     }
 
     // Context Types
