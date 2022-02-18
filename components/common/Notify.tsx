@@ -3,10 +3,9 @@ import {
   Alert,
   AlertIcon,
   AlertTitle,
-  AlertDescription,
-  AlertStatus
+  AlertDescription
 } from "@chakra-ui/react";
-import style from "../../styles/swap.module.sass";
+import style from "../../styles/common.module.sass";
 
 const Notify: FunctionComponent<NotifyProps> = props => {
   return (

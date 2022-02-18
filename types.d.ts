@@ -1,18 +1,31 @@
 import { WalletContextState } from "@solana/wallet-adapter-react"
 import { Connection } from "@solana/web3.js"
+import { AlertStatus } from "@chakra-ui/react";
+import { SetStateAction, Dispatch} from "react"
 
 declare global {
 
-    interface IUpdateAmountData {
-        type: string;
-        amount: number;
-    }
-    
+    // Common Components
     interface INotify {
         status: AlertStatus;
         title: string;
         description: string;
         link?: string;
+    }
+
+    type LoadingType = {    
+        msg: string,
+        size?: "xl" | "xs" | "sm" | "md" | "lg",
+        thickness?: number,                         // uint ex: 3 (in pixel)
+        speed?: number,                             // floating point ex: 0.65s (in second)
+        emptyColor?: string,                        // ex: gray.200 (see chakra doc)
+        color?: string,                             // ex: blue.500 (see chakra doc)
+    }
+
+    // Raydium Components
+    interface IUpdateAmountData {
+        type: string;
+        amount: number;
     }
 
     interface ITokenInfo {
@@ -47,13 +60,13 @@ declare global {
     }
 
     // Components props
+
+    type LoadingProps = {
+        data: LoadingType
+    }
+
     interface NotifyProps {
-        message: {
-            status: AlertStatus;
-            title: string;
-            description: string;
-            link?: string;
-        };
+        message: INotify;
     }
 
     interface ISplTokenProps {
@@ -96,11 +109,14 @@ declare global {
         value: string;
     }
 
+
     // Context Types
 
     type DappContextType = {
         splTokens: ISplToken[] | undefined,
         connection: Connection,
+        setNotify: Dispatch<SetStateAction<INotify | null>>| null,
+        setLoading: Dispatch<SetStateAction<LoadingType | null>>| null
     }
 }
 export {}

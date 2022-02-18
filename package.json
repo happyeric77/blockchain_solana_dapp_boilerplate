@@ -15,6 +15,7 @@
     "@jup-ag/react-hook": "^1.0.0-beta.2",
     "@project-serum/borsh": "^0.2.3",
     "@project-serum/serum": "^0.13.61",
+    "@raydium-io/raydium-sdk": "^1.0.1-beta.30",
     "@solana/spl-token-registry": "^0.2.1733",
     "@solana/wallet-adapter-base": "^0.9.2",
     "@solana/wallet-adapter-react": "^0.15.2",

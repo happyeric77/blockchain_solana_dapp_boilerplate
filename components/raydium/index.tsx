@@ -1,6 +1,4 @@
 import { useState, useEffect, FunctionComponent } from "react";
-// import { PublicKey, Connection } from "@solana/web3.js";
-// import { Spinner } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { getPoolByTokenMintAddresses } from "../../utils/pools";
 import { swap, getSwapOutAmount, setupPools } from "../../utils/swap";
@@ -19,28 +17,21 @@ const SwapPage: FunctionComponent = () => {
   const [slippageValue, setSlippageValue] = useState(1);
   const [splTokenData, setSplTokenData] = useState<ISplToken[]>([]);
   const [liquidityPools, setLiquidityPools] = useState<any>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [notify, setNotify] = useState<INotify>({
-    status: "info",
-    title: "",
-    description: "",
-    link: ""
-  });
-
-  const [showNotify, toggleNotify] = useState<Boolean>(false);
                                                                             // Other Hooks
   let wallet = useWallet();
-  let { connection, splTokens } = useDapp()
+  let { connection, splTokens, notify, setNotify, setLoading } = useDapp()
 
   useEffect(()=>{
     splTokens && setSplTokenData(splTokens)
   }, [splTokens])
 
   useEffect(() => {                                                         // Setup Liquidity Pools
-    setIsLoading(true);
+    setLoading!({
+      msg: "Loading Liquidity Pools"
+    });
     setupPools(connection).then(data => {
       setLiquidityPools(data);
-      setIsLoading(false);
+      setLoading!(null)
     });
     return () => {
       setLiquidityPools("");
@@ -76,13 +67,11 @@ const SwapPage: FunctionComponent = () => {
       );
 
       if (!poolInfo) {                                                        // If get no LP then trigger notification                          
-        setNotify((old: INotify) => ({                                        /** @TODO Manual update pool?? how to get the Liquidity pool in util auto update? */
-          ...old,
+        setNotify!(() => ({                                                    /** @TODO Manual update pool?? how to get the Liquidity pool in util auto update? */
           status: "error",
           title: "AMM error",
           description: "Current token pair pool not found"        
         }));
-        toggleNotify(true);
         return;
       }
 
@@ -230,31 +219,27 @@ const SwapPage: FunctionComponent = () => {
       toData.amount!.toString(),
       wsolMint
     ).then(async res => {
-      toggleNotify(true);
-      setNotify((old: INotify) => ({
-        ...old,
-        status: "success",
-        title: "Transaction Send",
-        description: "",
-        link: `https://explorer.solana.com/address/${res}`
+      setNotify!(() => ({                                                    
+        status: "error",
+        title: "AMM error",
+        description: "Current token pair pool not found"        
       }));
 
       let result = await connection.confirmTransaction(res);
 
       if (!result.value.err) {
-        setNotify((old: INotify) => ({
-          ...old,
+        setNotify!({
           status: "success",
-          title: "Transaction Success"
-        }));
+          title: "Transaction Success",
+          description: "",
+        });
       } else {
-        setNotify((old: INotify) => ({
-          ...old,
+        setNotify!({
           status: "success",
           title: "Fail",
           description: "Transaction fail, please check below link",
           link: `https://explorer.solana.com/address/${res}`
-        }));
+        });
       }
 
       getSPLTokenData(wallet, connection).then((tokenList: ISplToken[]) => {
@@ -268,35 +253,24 @@ const SwapPage: FunctionComponent = () => {
   };
 
   useEffect(() => {
-    const time = setTimeout(() => {
-      toggleNotify(false);
-    }, 8000);
-
-    return () => clearTimeout(time);
-  }, [notify]);
-
-  useEffect(() => {
     if (wallet.connected) {
-      setNotify((old: INotify) => ({
-        ...old,
+      setNotify!({
         status: "success",
         title: "Wallet connected",
         description: wallet.publicKey?.toBase58() as string
-      }));
+      });
     } else {
       let description = wallet.publicKey?.toBase58();
       if (!description) {
         description = "Please try again";
       }
-      setNotify((old: INotify) => ({
-        ...old,
+      setNotify!({
         status: "error",
         title: "Wallet disconnected",
         description: description as string
-      }));
+      });
     }
 
-    toggleNotify(true);
   }, [wallet.connected]);
 
   return (
