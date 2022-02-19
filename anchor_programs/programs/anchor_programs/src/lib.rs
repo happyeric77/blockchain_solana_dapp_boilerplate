@@ -15,10 +15,11 @@ pub mod anchor_programs {
     pub fn initialize(ctx: Context<Initialize>, price: u64) -> ProgramResult {
         ctx.accounts.nft_creator.price = price;
         ctx.accounts.nft_creator.collection = vec![];
-        msg!("GGG");
+        
         Ok(())
     }    
     pub fn mintnft(ctx: Context<MintNFT>) -> ProgramResult {
+        msg!("First line in MintNFT processor");
         let (mint_pda, _bump) = Pubkey::find_program_address(
             &[b"nft_creator"], 
             &ctx.accounts.nft_creater_program.key()
@@ -30,11 +31,17 @@ pub mod anchor_programs {
             Some(&ctx.accounts.nft_creater_program.key()),
             0,
         )?;
-        invoke(&create_mint_ix, &[
-            ctx.accounts.token_program.clone(),
-            ctx.accounts.mint_pda_acc.clone(),
-            ctx.accounts.nft_creater_program.clone()
-        ])?;
+        msg!("token program id: {}", &ctx.accounts.token_program.key().to_string());
+        msg!("minter acc pubkey: {}", &ctx.accounts.minter.key().to_string());
+        msg!("nft-creator program acc pubkey: {}",&ctx.accounts.nft_creater_program.key().to_string());
+        msg!("nft-creator acc pubkey: {}",&ctx.accounts.nft_creater.key().to_string());
+        msg!("mint-pda acc pubkey: {}", &mint_pda.to_string());
+        // invoke(&create_mint_ix, &[
+        //     ctx.accounts.minter.clone(),
+        //     ctx.accounts.token_program.clone(),
+        //     ctx.accounts.mint_pda_acc.clone(),
+        //     ctx.accounts.nft_creater_program.clone()
+        // ])?;
         
         Ok(())
     }
