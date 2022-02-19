@@ -15,7 +15,7 @@ pub mod anchor_programs {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer=initializer, space=500)]                   // TODO: Check who to define space
+    #[account(init, payer=initializer, space=500)]                   // TODO: Check how to define space
     pub nft_creator: Account<'info, NftCreator>,
     #[account(mut, signer)]
     pub initializer: AccountInfo<'info>,

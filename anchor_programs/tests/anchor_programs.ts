@@ -51,7 +51,7 @@ describe('anchor_programs', () => {
 
   it('is initialized', async () => {
     const tx = await program.rpc.initialize(
-      new anchor.BN("3"),
+      new anchor.BN((0.3*1e9).toString()),
       {
         accounts: {
           nftCreator: nftCreatorAcc.publicKey,
@@ -64,5 +64,10 @@ describe('anchor_programs', () => {
       }
     );
     console.log("Your transaction signature", tx);
+
+                                                                                                      // Fetch intialized account data info
+    let data = await program.account.nftCreator.fetch(nftCreatorAcc.publicKey)
+    console.log("Created NFT items",data.collection)
+    console.log("Price: ", Number(data.price)/1e9, "SOL")
   });
 });
