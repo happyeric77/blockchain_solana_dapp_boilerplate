@@ -2,6 +2,7 @@ import * as anchor from '@project-serum/anchor';
 import { Program } from '@project-serum/anchor';
 import { AnchorPrograms } from '../target/types/anchor_programs';
 import { SystemProgram, Transaction } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID, Token } from "@solana/spl-token";
 
 describe('anchor_programs', () => {
 
@@ -69,5 +70,36 @@ describe('anchor_programs', () => {
     let data = await program.account.nftCreator.fetch(nftCreatorAcc.publicKey)
     console.log("Created NFT items",data.collection)
     console.log("Price: ", Number(data.price)/1e9, "SOL")
+  });
+  it('is minted', async () => {
+    let [mint_pda, _bump] = await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from(anchor.utils.bytes.utf8.encode("nft_creator"))],
+        program.programId
+    )
+    
+    console.log("\n token program id: ",TOKEN_PROGRAM_ID.toBase58(), "\n", 
+        "minter acc pubkey: ",initializerMainAccount.publicKey.toBase58(),"\n",
+        "nft-creator state acc pubkey: ", nftCreatorAcc.publicKey.toBase58(),"\n",
+        "nft-creator program acc pubkey", program.programId.toBase58(), "\n", 
+        "mint-pda acc pubkey", mint_pda.toBase58(), "\n")
+
+    const tx = await program.rpc.mintnft({
+        accounts: {
+            tokenProgram: TOKEN_PROGRAM_ID,
+            minter: initializerMainAccount.publicKey,
+            nftCreater: nftCreatorAcc.publicKey,
+            nftCreaterProgram: program.programId,
+            mintPdaAcc: mint_pda,
+            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        },
+        signers: [initializerMainAccount]
+    });
+    console.log("Your transaction signature", tx);
+
+    //                                                                                                   // Fetch intialized account data info
+    // let data = await program.account.nftCreator.fetch(nftCreatorAcc.publicKey)
+    // console.log("Created NFT items",data.collection)
+    // console.log("Price: ", Number(data.price)/1e9, "SOL")
+    
   });
 });
