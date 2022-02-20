@@ -8,7 +8,7 @@ use solana_program::system_instruction;
 // use spl_associated_token_account::{create_associated_token_account, get_associated_token_address};
 
 
-declare_id!("6KA5onmgQN7gsBZ5whPCTVL4EQcRob6vw7TYYNvik8xb");
+declare_id!("ArT6Hwus2hMwmNeNeJ2zGcQnvZsbrhz8vTbBdq35AdgG");
 
 #[program]
 pub mod anchor_programs {
@@ -30,13 +30,14 @@ pub mod anchor_programs {
         }
         let create_acc_ix = system_instruction::create_account(        // Try create account using system_instruction
             &ctx.accounts.minter.key(),
-            &mint_pda,
+            &ctx.accounts.mint_pda_acc.key(),
             ctx.accounts.rent.minimum_balance(Mint::LEN),
             Mint::LEN as u64,
-            &spl_token::id(),
+            &spl_token::ID,
         );
         invoke(&create_acc_ix, &[                          // Use invoke to call cross program invocation
             ctx.accounts.minter.clone(),
+            ctx.accounts.mint_pda_acc.clone(),
         ])?;        
         Ok(())
     }
