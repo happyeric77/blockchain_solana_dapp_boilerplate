@@ -11,11 +11,10 @@ describe('anchor_programs', () => {
 
   const program = anchor.workspace.AnchorPrograms as Program<AnchorPrograms>;
   const provider = anchor.Provider.env();
-
-                                                                                  // Create corrisponding accounts
-  const nftCreatorAcc = anchor.web3.Keypair.generate();
-  const payer = anchor.web3.Keypair.generate();
-  const initializerMainAccount = anchor.web3.Keypair.generate();
+                                                                                          /**@BaseAccounts */
+  const nftCreatorAcc = anchor.web3.Keypair.generate();                                   // The nft creator state account
+  const payer = anchor.web3.Keypair.generate();                                           // payer keypair to allowcate airdropped funds 
+  const initializerMainAccount = anchor.web3.Keypair.generate();                          // initializer (or main operator) account
                                                                                   
   it("Setup program state", async () => {
 
@@ -71,35 +70,33 @@ describe('anchor_programs', () => {
     console.log("Created NFT items",data.collection)
     console.log("Price: ", Number(data.price)/1e9, "SOL")
   });
+
   it('is minted', async () => {
-    let [mint_pda, _bump] = await anchor.web3.PublicKey.findProgramAddress(
+    let [mint_pda, _bump] = await anchor.web3.PublicKey.findProgramAddress(               // Use findProgram Address to generate PDA
         [Buffer.from(anchor.utils.bytes.utf8.encode("nft_creator"))],
         program.programId
     )
+    // const mint_pda = anchor.web3.Keypair.generate();
     
-    console.log("\n token program id: ",TOKEN_PROGRAM_ID.toBase58(), "\n", 
-        "minter acc pubkey: ",initializerMainAccount.publicKey.toBase58(),"\n",
-        "nft-creator state acc pubkey: ", nftCreatorAcc.publicKey.toBase58(),"\n",
-        "nft-creator program acc pubkey", program.programId.toBase58(), "\n", 
-        "mint-pda acc pubkey", mint_pda.toBase58(), "\n")
+    // console.log("\n token program id: ",TOKEN_PROGRAM_ID.toBase58(), "\n", 
+    //     "minter acc pubkey: ",initializerMainAccount.publicKey.toBase58(),"\n",
+    //     "nft-creator state acc pubkey: ", nftCreatorAcc.publicKey.toBase58(),"\n",
+    //     "nft-creator program acc pubkey", program.programId.toBase58(), "\n", 
+    //     "mint-pda acc pubkey", mint_pda.toBase58(), "\n")
+    //     // "mint-pda acc pubkey", mint_pda.publicKey, "\n")
 
-    const tx = await program.rpc.mintnft({
-        accounts: {
-            tokenProgram: TOKEN_PROGRAM_ID,
-            minter: initializerMainAccount.publicKey,
-            nftCreater: nftCreatorAcc.publicKey,
-            nftCreaterProgram: program.programId,
-            mintPdaAcc: mint_pda,
-            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+    const tx = await program.rpc.mintnft({                                                // Call program mintnft instruction
+        accounts: {                                                                       /**@ACCOUNTS */
+            // tokenProgram: TOKEN_PROGRAM_ID,
+            minter: initializerMainAccount.publicKey,                                       // 1. minter as the initializer
+            // nftCreater: nftCreatorAcc.publicKey,
+            nftCreaterProgram: program.programId,                                           // 2. this program id
+            mintPdaAcc: mint_pda,                                                           // 3. The mint_pda just generated
+            // mintPdaAcc: mint_pda.publicKey,
+            rent: anchor.web3.SYSVAR_RENT_PUBKEY,                                           // 4. sysVar 
         },
         signers: [initializerMainAccount]
     });
-    console.log("Your transaction signature", tx);
-
-    //                                                                                                   // Fetch intialized account data info
-    // let data = await program.account.nftCreator.fetch(nftCreatorAcc.publicKey)
-    // console.log("Created NFT items",data.collection)
-    // console.log("Price: ", Number(data.price)/1e9, "SOL")
-    
+    console.log("Your transaction signature", tx);    
   });
 });
