@@ -108,7 +108,7 @@ describe('anchor_programs', async() => {
       "\nminter: ", initializerMainAccount.publicKey.toBase58(), 
       "\nmint_pda_acc: ", mint_pda.toBase58(),
       "\nmint_pda_lamport: ", pda_bal,
-      "\nmint_creater_program: ", program.programId.toBase58(),
+      "\nnft_creater_program: ", program.programId.toBase58(),
       "\nmint_seed: ", seed,
       "\nmint_bump: ", bump_seed,
       "\nCreated NFT items", updated_state.collection,
@@ -132,12 +132,14 @@ describe('anchor_programs', async() => {
     );
     
     const tx = await program.rpc.mintnft(
+      minted_seed,
       {                                                // Call program mintnft instruction
         accounts: {                                                                       /**@ACCOUNTS */
             minter: initializerMainAccount.publicKey,                                          // 2. this program id
             mintPdaAcc: token_mint.publicKey,  
             minterAta: minter_ata.address,                                                         // 3. The mint_pda just generated
             rent: anchor.web3.SYSVAR_RENT_PUBKEY,                                           // 4. sysVar 
+            nftCreator: nftCreatorAcc.publicKey,
             nftCreatorProgram: program.programId,
             systemProgram: anchor.web3.SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,

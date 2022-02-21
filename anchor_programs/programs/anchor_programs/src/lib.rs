@@ -1,9 +1,6 @@
 /**
  * TODO: 
- *  1. MintNFT processor
- *      - Fail if the token mint NOT in the collection
- *      - Fail if the token mint's supply > 0
- *  2. MintNFT new impl
+ *  1. MintNFT new impl
  *      - attach metadata
  */
 
@@ -11,7 +8,6 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use solana_program::program::{invoke_signed, invoke};
 use solana_program::system_instruction;
-
 declare_id!("ArT6Hwus2hMwmNeNeJ2zGcQnvZsbrhz8vTbBdq35AdgG");
 
 #[program]
@@ -31,7 +27,15 @@ pub mod anchor_programs {
         Ok(())
     }
 
-    pub fn mintnft(ctx: Context<MintNFT>) -> ProgramResult {
+    pub fn mintnft(ctx: Context<MintNFT>, seed: String) -> ProgramResult {
+        if ctx.accounts.mint_pda_acc.supply > 0  {                                                      //Fail if the token mint's supply > 0 
+            msg!("mintnft Error code 100: this mint has already been minted");
+            return Err(ProgramError::Custom(100))
+        }
+        if let None = ctx.accounts.nft_creator.collection.iter().find(|item| **item == seed) {  // Fail if the token mint NOT in the collection
+            msg!("mintnft Error code 101: Cannot find this item in the collection");
+            return Err(ProgramError::Custom(101))
+        };
         ctx.accounts.mint_nft()?;
         Ok(())
     }
@@ -39,7 +43,7 @@ pub mod anchor_programs {
 
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer=initializer, space=500)]                   // TODO: Check how to define space
+    #[account(init, payer=initializer, space=500)]                   
     pub nft_creator: Account<'info, NftCreator>,
     #[account(mut, signer)]
     pub initializer: AccountInfo<'info>,
@@ -116,13 +120,15 @@ impl<'info> InitNFT<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(seed: String)]
 pub struct MintNFT<'info> {
     #[account(mut, signer)]
     pub minter: AccountInfo<'info>,
     #[account(mut)]
-    pub mint_pda_acc: AccountInfo<'info>,
+    pub mint_pda_acc: Account<'info, Mint>,
     #[account(mut)]
     pub minter_ata: Account<'info, TokenAccount>,
+    pub nft_creator: Account<'info, NftCreator>,
     pub nft_creator_program: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
@@ -133,13 +139,13 @@ impl <'info> MintNFT<'info> {
     fn mint_nft(&self) -> ProgramResult {
         let ix = spl_token::instruction::mint_to(
             &spl_token::ID, 
-            self.mint_pda_acc.key, 
+            self.mint_pda_acc.to_account_info().key, 
             self.minter_ata.to_account_info().key, 
             self.minter.key, 
             &[self.minter.key], 
             1)?;
         invoke(&ix, &[
-            self.mint_pda_acc.clone(),
+            self.mint_pda_acc.to_account_info().clone(),
             self.minter_ata.to_account_info().clone(),
             self.minter.clone()
         ])?;
