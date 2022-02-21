@@ -72,20 +72,13 @@ describe('anchor_programs', () => {
   });
 
   it('is minted', async () => {
-    let [mint_pda, _bump] = await anchor.web3.PublicKey.findProgramAddress(               // Use findProgram Address to generate PDA
+    let [mint_pda, bump_seed] = await anchor.web3.PublicKey.findProgramAddress(               // Use findProgram Address to generate PDA
         [Buffer.from(anchor.utils.bytes.utf8.encode("nft_creator"))],
         program.programId
     )
-    // const mint_pda = anchor.web3.Keypair.generate();
-    
-    // console.log("\n token program id: ",TOKEN_PROGRAM_ID.toBase58(), "\n", 
-    //     "minter acc pubkey: ",initializerMainAccount.publicKey.toBase58(),"\n",
-    //     "nft-creator state acc pubkey: ", nftCreatorAcc.publicKey.toBase58(),"\n",
-    //     "nft-creator program acc pubkey", program.programId.toBase58(), "\n", 
-    //     "mint-pda acc pubkey", mint_pda.toBase58(), "\n")
-    //     // "mint-pda acc pubkey", mint_pda.publicKey, "\n")
-
-    const tx = await program.rpc.mintnft({                                                // Call program mintnft instruction
+    const tx = await program.rpc.mintnft(
+      bump_seed, 
+      {                                                // Call program mintnft instruction
         accounts: {                                                                       /**@ACCOUNTS */
             // tokenProgram: TOKEN_PROGRAM_ID,
             minter: initializerMainAccount.publicKey,                                       // 1. minter as the initializer
@@ -94,6 +87,7 @@ describe('anchor_programs', () => {
             mintPdaAcc: mint_pda,                                                           // 3. The mint_pda just generated
             // mintPdaAcc: mint_pda.publicKey,
             rent: anchor.web3.SYSVAR_RENT_PUBKEY,                                           // 4. sysVar 
+            systemProgram: anchor.web3.SystemProgram.programId,
         },
         signers: [initializerMainAccount]
     });
