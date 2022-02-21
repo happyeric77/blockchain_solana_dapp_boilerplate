@@ -4,7 +4,7 @@ import { AnchorPrograms } from '../target/types/anchor_programs';
 import { SystemProgram, Transaction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, Token } from "@solana/spl-token";
 
-describe('anchor_programs', () => {
+describe('anchor_programs', async() => {
 
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.Provider.env());
@@ -13,9 +13,13 @@ describe('anchor_programs', () => {
   const provider = anchor.Provider.env();
                                                                                           /**@BaseAccounts */
   const nftCreatorAcc = anchor.web3.Keypair.generate();                                   // The nft creator state account
+  
   const payer = anchor.web3.Keypair.generate();                                           // payer keypair to allowcate airdropped funds 
   const initializerMainAccount = anchor.web3.Keypair.generate();                          // initializer (or main operator) account
-                                                                                  
+  let token_mint_pubkey: anchor.web3.PublicKey | undefined = undefined
+  let minted_bump: number | undefined = undefined
+  let minted_seed: string | undefined = undefined
+  
   it("Setup program state", async () => {
 
                                                                                   // Airdrop 1000 SOL to payer
@@ -49,7 +53,7 @@ describe('anchor_programs', () => {
     console.log("initializer's balance: ", initializerBal/1e9, " SOL")                                // List initializer's SOL balance
   })
 
-  it('is initialized', async () => {
+  it("is initialized", async () => {
     const tx = await program.rpc.initialize(
       new anchor.BN((0.3*1e9).toString()),
       {
@@ -64,36 +68,40 @@ describe('anchor_programs', () => {
       }
     );
     console.log("Your transaction signature", tx);
-
                                                                                                       // Fetch intialized account data info
     let data = await program.account.nftCreator.fetch(nftCreatorAcc.publicKey)
     console.log("Created NFT items",data.collection)
     console.log("Price: ", Number(data.price)/1e9, "SOL")
+    console.log("Total minted: ", Number(data.totalMinted))
   });
 
-  it('is minted', async () => {
+  it("inititialized NFT", async () => {
+    let minter_token_acc = new anchor.web3.Keypair
     let rand_seed = Math.round(Math.random()*10000)
-    let seed = `nft_creator_${rand_seed}`
+    let seed = `nft#${rand_seed}`
     let [mint_pda, bump_seed] = await anchor.web3.PublicKey.findProgramAddress(               // Use findProgram Address to generate PDA
         [Buffer.from(anchor.utils.bytes.utf8.encode(seed,))],
         program.programId
     )
-    const tx = await program.rpc.mintnft(
+    const tx = await program.rpc.initnft(
       bump_seed, 
       seed,
       {                                                // Call program mintnft instruction
         accounts: {                                                                       /**@ACCOUNTS */
-            minter: initializerMainAccount.publicKey,                                       // 1. minter as the initializer
+            minter: initializerMainAccount.publicKey,                                      // 1. minter as the initializer
             nftCreater: nftCreatorAcc.publicKey,
             nftCreaterProgram: program.programId,                                           // 2. this program id
-            mintPdaAcc: mint_pda,                                                           // 3. The mint_pda just generated
+            mintPdaAcc: mint_pda,                                                          // 3. The mint_pda just generated
             rent: anchor.web3.SYSVAR_RENT_PUBKEY,                                           // 4. sysVar 
             systemProgram: anchor.web3.SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,
         },
         signers: [initializerMainAccount]
     }); 
+
+
     let pda_bal = await provider.connection.getBalance(mint_pda)
+    let updated_state = await program.account.nftCreator.fetch(nftCreatorAcc.publicKey)
     console.log(
       "\nYour transaction signature: ", tx,
       "\nAccounts info:", 
@@ -102,7 +110,46 @@ describe('anchor_programs', () => {
       "\nmint_pda_lamport: ", pda_bal,
       "\nmint_creater_program: ", program.programId.toBase58(),
       "\nmint_seed: ", seed,
-      "\nmint_bump: ", bump_seed
+      "\nmint_bump: ", bump_seed,
+      "\nCreated NFT items", updated_state.collection,
+      "\nTotal minted: ", Number(updated_state.totalMinted)
     )
+    token_mint_pubkey = mint_pda
+    minted_bump = bump_seed
+    minted_seed = seed
   });
+
+  it("mint NFT", async () => {
+    // let minter_token_acc = new anchor.web3.Keypair
+    const token_mint = new Token(
+      provider.connection,
+      token_mint_pubkey,
+      TOKEN_PROGRAM_ID,
+      initializerMainAccount // the wallet owner will pay to transfer and to create recipients associated token account if it does not yet exist.
+    );
+    const minter_ata = await token_mint.getOrCreateAssociatedAccountInfo(
+      initializerMainAccount.publicKey
+    );
+    
+    const tx = await program.rpc.mintnft(
+      {                                                // Call program mintnft instruction
+        accounts: {                                                                       /**@ACCOUNTS */
+            minter: initializerMainAccount.publicKey,                                          // 2. this program id
+            mintPdaAcc: token_mint.publicKey,  
+            minterAta: minter_ata.address,                                                         // 3. The mint_pda just generated
+            rent: anchor.web3.SYSVAR_RENT_PUBKEY,                                           // 4. sysVar 
+            nftCreatorProgram: program.programId,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+        },
+        signers: [initializerMainAccount]
+    }); 
+    let ata_bal = await provider.connection.getTokenAccountBalance(minter_ata.address)
+    console.log(
+      "\nYour transaction signature: ", tx,
+      "\nAccounts info:", 
+      "\nMinter's token account: ", minter_ata.address.toBase58(),
+      "\nMinter's token account balance: ", ata_bal.value.amount
+    )
+  })
 });
