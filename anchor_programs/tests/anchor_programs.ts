@@ -72,12 +72,15 @@ describe('anchor_programs', () => {
   });
 
   it('is minted', async () => {
+    let rand_seed = Math.round(Math.random()*10000)
+    let seed = `nft_creator_${rand_seed}`
     let [mint_pda, bump_seed] = await anchor.web3.PublicKey.findProgramAddress(               // Use findProgram Address to generate PDA
-        [Buffer.from(anchor.utils.bytes.utf8.encode("nft_creator"))],
+        [Buffer.from(anchor.utils.bytes.utf8.encode(seed,))],
         program.programId
     )
     const tx = await program.rpc.mintnft(
       bump_seed, 
+      seed,
       {                                                // Call program mintnft instruction
         accounts: {                                                                       /**@ACCOUNTS */
             // tokenProgram: TOKEN_PROGRAM_ID,
@@ -90,7 +93,16 @@ describe('anchor_programs', () => {
             systemProgram: anchor.web3.SystemProgram.programId,
         },
         signers: [initializerMainAccount]
-    });
-    console.log("Your transaction signature", tx);    
+    }); 
+    let pda_bal = await provider.connection.getBalance(mint_pda)
+    console.log(
+      "\nYour transaction signature: ", tx,
+      "\nAccounts info:", 
+      "\nminter: ", initializerMainAccount.publicKey.toBase58(), 
+      "\nmint_pda_acc: ", mint_pda.toBase58(),
+      "\nmint_pda_lamport: ", pda_bal,
+      "\nmint_creater_program: ", program.programId.toBase58()
+    )
   });
+
 });
