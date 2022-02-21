@@ -91,6 +91,7 @@ describe('anchor_programs', () => {
             // mintPdaAcc: mint_pda.publicKey,
             rent: anchor.web3.SYSVAR_RENT_PUBKEY,                                           // 4. sysVar 
             systemProgram: anchor.web3.SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
         },
         signers: [initializerMainAccount]
     }); 
