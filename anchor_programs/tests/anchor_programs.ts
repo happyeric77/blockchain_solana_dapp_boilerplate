@@ -83,12 +83,10 @@ describe('anchor_programs', () => {
       seed,
       {                                                // Call program mintnft instruction
         accounts: {                                                                       /**@ACCOUNTS */
-            // tokenProgram: TOKEN_PROGRAM_ID,
             minter: initializerMainAccount.publicKey,                                       // 1. minter as the initializer
-            // nftCreater: nftCreatorAcc.publicKey,
+            nftCreater: nftCreatorAcc.publicKey,
             nftCreaterProgram: program.programId,                                           // 2. this program id
             mintPdaAcc: mint_pda,                                                           // 3. The mint_pda just generated
-            // mintPdaAcc: mint_pda.publicKey,
             rent: anchor.web3.SYSVAR_RENT_PUBKEY,                                           // 4. sysVar 
             systemProgram: anchor.web3.SystemProgram.programId,
             tokenProgram: TOKEN_PROGRAM_ID,
@@ -102,8 +100,9 @@ describe('anchor_programs', () => {
       "\nminter: ", initializerMainAccount.publicKey.toBase58(), 
       "\nmint_pda_acc: ", mint_pda.toBase58(),
       "\nmint_pda_lamport: ", pda_bal,
-      "\nmint_creater_program: ", program.programId.toBase58()
+      "\nmint_creater_program: ", program.programId.toBase58(),
+      "\nmint_seed: ", seed,
+      "\nmint_bump: ", bump_seed
     )
   });
-
 });

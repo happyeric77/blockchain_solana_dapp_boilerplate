@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token};
-use solana_program::program::invoke_signed;
+use solana_program::program::{invoke_signed, invoke};
 use solana_program::system_instruction;
 
 declare_id!("ArT6Hwus2hMwmNeNeJ2zGcQnvZsbrhz8vTbBdq35AdgG");
@@ -16,7 +16,7 @@ pub mod anchor_programs {
     }    
     pub fn mintnft(ctx: Context<MintNFT>, bump_seed: u8, mint_seed: String) -> ProgramResult {
         ctx.accounts.create_mint_pda_acc(&bump_seed, &mint_seed)?;     
-        ctx.accounts.init_mint_pda_acc(&bump_seed, &mint_seed)?;
+        ctx.accounts.init_mint_pda_acc()?;
         Ok(())
     }
 }
@@ -36,6 +36,7 @@ pub struct MintNFT<'info> {
     pub minter: AccountInfo<'info>,
     #[account(mut)]
     pub mint_pda_acc: AccountInfo<'info>,
+    pub nft_creater: AccountInfo<'info>,
     pub nft_creater_program: AccountInfo<'info>,
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
@@ -51,13 +52,10 @@ impl<'info> MintNFT<'info> {
             Mint::LEN as u64,
             &spl_token::ID,
         );
-        /**
-         * @invoke_signed
-         * It is neccessory to use invoke_signed rather than invoke as the create_account method requires 
-         * both "from_public"(minter) and "to_public"(pda) to sign.
-         * @system_program
-         * It needs to be brough into scope as it is called to create an account
-         *  */                                                                            
+                                                                                    // @invoke_signed --> SYSTEM PROGRAM (bringing System Program into scope)
+                                                                                    // Use invoke_signed rather than invoke -->
+                                                                                    //  - THIS PROGRAM calls SYSTEM PROGRAM's create_acount instruction
+                                                                                    //  - MINT_PDA_ACCOUNT calls system program to initalized itself                                                                            
         invoke_signed(                                                            
             &create_acc_ix,                                             
             &[                          
@@ -65,28 +63,29 @@ impl<'info> MintNFT<'info> {
                 self.mint_pda_acc.clone(),
             ],
             // &[&[ &b"nft_creator"[..], &[bump_seed] ]]
-            &[&[ &mint_seed.as_bytes()[..], &[*bump_seed] ]]
+            // &[&[ &mint_seed.as_bytes()[..], &[*bump_seed] ]]
+            &[&[ &mint_seed.as_ref(), &[*bump_seed] ]]
         )?; 
         Ok(())
     }
     
-    fn init_mint_pda_acc(&self, bump_seed: &u8, mint_seed: &String) -> ProgramResult {
-        let create_mint_ix = spl_token::instruction::initialize_mint(
+    fn init_mint_pda_acc(&self) -> ProgramResult {
+        let init_mint_ix = spl_token::instruction::initialize_mint(
             &spl_token::ID,
             &self.mint_pda_acc.key,
-            &self.minter.key,
-            Some(&self.minter.key),
+            &self.nft_creater.key,
+            Some(&self.nft_creater.key),
             0,
-        )?;                                                                       
-        invoke_signed(                                                            
-            &create_mint_ix,                                             
+        )?;
+                                                                                    // @Invoke --> SPL TOKEN PROGRAM (bringing token_program into scope)
+                                                                                    // Use invoke rather than invoke_sign: THIS PROGRAM calls SPL TOKEN PROGRAM's initialize_mint instruction                                                                  
+        invoke(                                                            
+            &init_mint_ix,                                             
             &[                          
                 self.minter.clone(),
                 self.mint_pda_acc.clone(),
                 self.rent.to_account_info().clone(),
-            ],
-            // &[&[ &b"nft_creator"[..], &[bump_seed] ]]
-            &[&[ &mint_seed.as_bytes()[..], &[*bump_seed] ]]
+            ]
         )?; 
         Ok(())
     }
