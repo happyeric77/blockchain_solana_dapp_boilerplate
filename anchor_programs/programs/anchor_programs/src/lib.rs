@@ -1,10 +1,9 @@
 /**
  * TODO: 
- *  1. Customize error code
- *  2. Optimaize space
- *  3. Set mint supply cap = 1
- *  4. wet updateable = false
- *  5. change mintAuthority after getMetadata
+ *  1. Optimaize space
+ *  2. Set mint supply cap = 1
+ *  3. wet updateable = false
+ *  4. change mintAuthority after getMetadata
  */
 
 use anchor_lang::prelude::*;
@@ -34,12 +33,10 @@ pub mod anchor_programs {
 
     pub fn mintnft(ctx: Context<MintNFT>, seed: String) -> ProgramResult {
         if ctx.accounts.mint_pda_acc.supply > 0  {                                                      //Fail if the token mint's supply > 0 
-            msg!("mintnft Error code 100: this mint has already been minted");
-            return Err(ProgramError::Custom(100))
+            return Err(NftCreatorError::AlreadyMinted.into())
         }
         if let None = ctx.accounts.nft_creator.collection.iter().find(|item| **item == seed) {  // Fail if the token mint NOT in the collection
-            msg!("mintnft Error code 101: Cannot find this item in the collection");
-            return Err(ProgramError::Custom(101))
+            return Err(NftCreatorError::ItemNotFound.into())
         };
         ctx.accounts.mint_nft()?;
         Ok(())
@@ -67,12 +64,12 @@ pub struct Initialize<'info> {
 
 impl<'info> Initialize<'info> {
     fn create_nft_manager_pda_acc(&self, bump: u8) -> ProgramResult {
-        let seed = b"nft_manager15";
+        let seed = b"nft_manager16";
         let manager_bump = Pubkey::find_program_address(
             &[seed], 
             self.nft_creater_program.key).1;
         if manager_bump != bump {
-            return Err(ProgramError::Custom(99))
+            return Err(NftCreatorError::IncorrectNftManager.into())
         }
         let ix = system_instruction::create_account(
             self.initializer.key, 
@@ -222,7 +219,7 @@ impl<'info> GetMetadata<'info> {
         };
         let (metadata_account, metadata_bump) = Pubkey::find_program_address(seeds, &metaplex_token_metadata::id());
         if bump != metadata_bump {
-            return Err(ProgramError::Custom(0x99))
+            return Err(NftCreatorError::IncorrectMatadataAccount.into())
         }
         let metadata_ix = metaplex_token_metadata::instruction::create_metadata_accounts(
             metaplex_token_metadata::id(),
@@ -248,21 +245,6 @@ impl<'info> GetMetadata<'info> {
             self.rent.to_account_info().clone(),
             self.metaplex_token_program.clone()
         ])?;
-        // invoke_signed(&metadata_ix, &[
-        //     self.mint_pda_acc.to_account_info().clone(),
-        //     self.minter.clone(),
-        //     // self.nft_manager.clone(),
-        //     self.metadata_account.clone(),
-        //     self.rent.to_account_info().clone(),
-        //     self.metaplex_token_program.clone(),
-        //     self.system_program.to_account_info().clone(),
-        // ], &[&[ 
-        //     state::PREFIX.as_bytes(),
-        //     &metaplex_token_metadata::id().to_bytes(),
-        //     &self.mint_pda_acc.key().to_bytes(), 
-        //     &[bump] 
-        //     ]]
-        // )?;
         Ok(())
     }
 }
@@ -272,5 +254,17 @@ pub struct NftCreator {
     collection: Vec<String>,
     total_minted: u8,
     price: u64
+}
+
+#[error]
+pub enum NftCreatorError {
+    #[msg("mintnft Error: this mint has already been minted")]
+    AlreadyMinted,
+    #[msg("Cannot find this item in NFT collection")]
+    ItemNotFound,
+    #[msg("Input NFT manager account is not matched")]
+    IncorrectNftManager,
+    #[msg("Input metadata account is not matched")]
+    IncorrectMatadataAccount,
 }
 

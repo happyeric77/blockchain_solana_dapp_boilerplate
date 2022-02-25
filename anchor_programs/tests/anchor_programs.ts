@@ -26,7 +26,7 @@ describe('anchor_programs', async() => {
   const initializerMainAccount = anchor.web3.Keypair.generate();                          // initializer (or main operator) account
   let token_mint_pubkey: anchor.web3.PublicKey | undefined = undefined
   let nft_manager: PublicKey | undefined = undefined
-  let nft_manager_seed = `nft_manager15`
+  let nft_manager_seed = `nft_manager16`
   let minted_seed: string | undefined = undefined
   
   it("Setup program state", async () => {
