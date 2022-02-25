@@ -1,16 +1,24 @@
 import * as anchor from '@project-serum/anchor';
 import { Program } from '@project-serum/anchor';
 import { AnchorPrograms } from '../target/types/anchor_programs';
-import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
+import { Connection, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, Token } from "@solana/spl-token";
 
 describe('anchor_programs', async() => {
 
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.Provider.env());
-
-  const program = anchor.workspace.AnchorPrograms as Program<AnchorPrograms>;
   const provider = anchor.Provider.env();
+  const program = anchor.workspace.AnchorPrograms as Program<AnchorPrograms>;
+  
+  // const conn = new Connection("https://rpc-mainnet-fork.dappio.xyz", { 
+  //   wsEndpoint: "wss://rpc-mainnet-fork.dappio.xyz/ws", 
+  //   commitment: "recent", 
+  // });
+  // const NodeWallet = require("@project-serum/anchor/src/nodewallet.js").default;
+  // const wallet = NodeWallet.local();
+  // const options = anchor.Provider.defaultOptions();
+  // const provider = new anchor.Provider(conn, wallet, options);
                                                                                           /**@BaseAccounts */
   const nftCreatorAcc = anchor.web3.Keypair.generate();                                   // The nft creator state account
   
@@ -18,7 +26,7 @@ describe('anchor_programs', async() => {
   const initializerMainAccount = anchor.web3.Keypair.generate();                          // initializer (or main operator) account
   let token_mint_pubkey: anchor.web3.PublicKey | undefined = undefined
   let nft_manager: PublicKey | undefined = undefined
-  let nft_manager_seed = `nft_manager5`
+  let nft_manager_seed = `nft_manager15`
   let minted_seed: string | undefined = undefined
   
   it("Setup program state", async () => {
@@ -173,8 +181,14 @@ describe('anchor_programs', async() => {
       ],
       new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
     )
+    let name = "Test SOLANA NFT"
+    let symbol = "TSN"
+    let uri ="tsn.com.test"
     const tx = await program.rpc.getmetadata(
       metadata_account_bump,
+      name,
+      symbol,
+      uri,
       {
         accounts: {
           minter: initializerMainAccount.publicKey, 

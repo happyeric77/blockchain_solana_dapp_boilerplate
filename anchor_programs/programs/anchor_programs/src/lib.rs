@@ -1,14 +1,17 @@
 /**
  * TODO: 
- *  1. MintNFT new impl
- *      - attach metadata
+ *  1. Customize error code
+ *  2. Optimaize space
+ *  3. Set mint supply cap = 1
+ *  4. wet updateable = false
+ *  5. change mintAuthority after getMetadata
  */
 
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use solana_program::program::{invoke_signed, invoke};
-use solana_program::{system_instruction, system_program};
-use metaplex_token_metadata::{self, state::{Creator, self, Metadata}};
+use solana_program::{system_instruction};
+use metaplex_token_metadata::{self, state::{Creator, self}};
 declare_id!("ArT6Hwus2hMwmNeNeJ2zGcQnvZsbrhz8vTbBdq35AdgG");
 
 #[program]
@@ -42,8 +45,8 @@ pub mod anchor_programs {
         Ok(())
     }
 
-    pub fn getmetadata(ctx: Context<GetMetadata>, bump: u8) -> ProgramResult {
-        ctx.accounts.get_metadata(bump)?;
+    pub fn getmetadata(ctx: Context<GetMetadata>, bump: u8, name: String, symbol: String, uri: String) -> ProgramResult {
+        ctx.accounts.get_metadata(bump, name, symbol, uri)?;
         Ok(())
     }
 }
@@ -64,7 +67,7 @@ pub struct Initialize<'info> {
 
 impl<'info> Initialize<'info> {
     fn create_nft_manager_pda_acc(&self, bump: u8) -> ProgramResult {
-        let seed = b"nft_manager5";
+        let seed = b"nft_manager15";
         let manager_bump = Pubkey::find_program_address(
             &[seed], 
             self.nft_creater_program.key).1;
@@ -193,7 +196,7 @@ impl <'info> MintNFT<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(bump: u8)]
+#[instruction(bump: u8, name: String, symbole: String, uri: String)]
 pub struct GetMetadata<'info>{
     #[account(mut, signer)]
     pub minter: AccountInfo<'info>,
@@ -206,8 +209,7 @@ pub struct GetMetadata<'info>{
     pub rent: Sysvar<'info, Rent>,
 }
 impl<'info> GetMetadata<'info> {
-    fn get_metadata(&self, bump: u8) -> ProgramResult {
-        msg!("TEST HERE");
+    fn get_metadata(&self, bump: u8, name: String, symbol: String, uri: String) -> ProgramResult {
         let seeds = &[
             state::PREFIX.as_bytes(),
             &metaplex_token_metadata::id().to_bytes(),
@@ -222,8 +224,6 @@ impl<'info> GetMetadata<'info> {
         if bump != metadata_bump {
             return Err(ProgramError::Custom(0x99))
         }
-        // msg!("{:?}",metadata_account.key());
-        // msg!("{:?}", metadata_bump);
         let metadata_ix = metaplex_token_metadata::instruction::create_metadata_accounts(
             metaplex_token_metadata::id(),
             metadata_account.key(),
@@ -231,13 +231,13 @@ impl<'info> GetMetadata<'info> {
             self.minter.key(),
             self.minter.key(),
             self.minter.key(),
-            "1".to_string(),
-            "1".to_string(),
-            "1".to_string(),
+            name,
+            symbol,
+            uri,
             Some(vec![creator]),
             0,
             true,
-            true,
+            false,
         );
         invoke(&metadata_ix, &[
             self.mint_pda_acc.to_account_info().clone(),
@@ -263,7 +263,6 @@ impl<'info> GetMetadata<'info> {
         //     &[bump] 
         //     ]]
         // )?;
-        
         Ok(())
     }
 }
