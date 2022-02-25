@@ -5,7 +5,10 @@ anchor_programs = "ArT6Hwus2hMwmNeNeJ2zGcQnvZsbrhz8vTbBdq35AdgG"
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "localnet"
+# cluster = "https://rpc-mainnet-fork.dappio.xyz"
+# cluster = "localnet"
+cluster = "https://api.devnet.solana.com"
+
 wallet = "/Users/macbookpro4eric/.config/solana/id.json"
 
 [scripts]

@@ -1,7 +1,7 @@
 import * as anchor from '@project-serum/anchor';
 import { Program } from '@project-serum/anchor';
 import { AnchorPrograms } from '../target/types/anchor_programs';
-import { SystemProgram, Transaction } from '@solana/web3.js';
+import { PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, Token } from "@solana/spl-token";
 
 describe('anchor_programs', async() => {
@@ -17,14 +17,15 @@ describe('anchor_programs', async() => {
   const payer = anchor.web3.Keypair.generate();                                           // payer keypair to allowcate airdropped funds 
   const initializerMainAccount = anchor.web3.Keypair.generate();                          // initializer (or main operator) account
   let token_mint_pubkey: anchor.web3.PublicKey | undefined = undefined
-  let minted_bump: number | undefined = undefined
+  let nft_manager: PublicKey | undefined = undefined
+  let nft_manager_seed = `nft_manager5`
   let minted_seed: string | undefined = undefined
   
   it("Setup program state", async () => {
 
                                                                                   // Airdrop 1000 SOL to payer
     await provider.connection.confirmTransaction(
-      await provider.connection.requestAirdrop(payer.publicKey, 1000000000000),
+      await provider.connection.requestAirdrop(payer.publicKey, 1000000000),
       "confirmed"
     )
                                                                                   // Payer funds initializer main account                 
@@ -35,7 +36,7 @@ describe('anchor_programs', async() => {
           SystemProgram.transfer({                                                    // First transaction is "SystemProgram.transfer" to fund SOL from payer to initializer's main account
             fromPubkey: payer.publicKey,
             toPubkey: initializerMainAccount.publicKey,
-            lamports: 100000000000,
+            lamports: 900000000,
           }),
         );
         return tx;
@@ -54,14 +55,21 @@ describe('anchor_programs', async() => {
   })
 
   it("is initialized", async () => {
+    let [nft_manager_pda, nft_manager_bump] = await anchor.web3.PublicKey.findProgramAddress(               // Use findProgram Address to generate PDA
+      [Buffer.from(anchor.utils.bytes.utf8.encode(nft_manager_seed))],
+      program.programId
+    )
     const tx = await program.rpc.initialize(
       new anchor.BN((0.3*1e9).toString()),
+      nft_manager_bump,
       {
         accounts: {
           nftCreator: nftCreatorAcc.publicKey,
           initializer: initializerMainAccount.publicKey,
           systemProgram: anchor.web3.SystemProgram.programId,
+          nftCreaterProgram: program.programId,
           rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+          nftManager: nft_manager_pda,
         },
         // instructions: [await program.account.nftCreator.createInstruction(nftCreatorAcc)],
         signers: [initializerMainAccount, nftCreatorAcc]
@@ -73,6 +81,7 @@ describe('anchor_programs', async() => {
     console.log("Created NFT items",data.collection)
     console.log("Price: ", Number(data.price)/1e9, "SOL")
     console.log("Total minted: ", Number(data.totalMinted))
+    nft_manager = nft_manager_pda
   });
 
   it("inititialized NFT", async () => {
@@ -115,7 +124,6 @@ describe('anchor_programs', async() => {
       "\nTotal minted: ", Number(updated_state.totalMinted)
     )
     token_mint_pubkey = mint_pda
-    minted_bump = bump_seed
     minted_seed = seed
   });
 
@@ -152,6 +160,37 @@ describe('anchor_programs', async() => {
       "\nAccounts info:", 
       "\nMinter's token account: ", minter_ata.address.toBase58(),
       "\nMinter's token account balance: ", ata_bal.value.amount
+    )
+  })
+  it("created metadata account", async () => {
+    let [metadata_account, metadata_account_bump] = await  PublicKey.findProgramAddress(
+      [
+        Buffer.from("metadata", "utf8"),
+        // Buffer.from("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s", "utf8"),
+        // Buffer.from(token_mint_pubkey.toBase58(), "utf8"),
+        (new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")).toBytes(),
+        token_mint_pubkey.toBuffer(),
+      ],
+      new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
+    )
+    const tx = await program.rpc.getmetadata(
+      metadata_account_bump,
+      {
+        accounts: {
+          minter: initializerMainAccount.publicKey, 
+          metadataAccount: metadata_account,
+          mintPdaAcc: token_mint_pubkey,
+          nftManager: nft_manager,
+          metaplexTokenProgram: new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"),
+          systemProgram: anchor.web3.SystemProgram.programId,
+          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        },
+        signers: [initializerMainAccount]
+      }      
+    )
+    console.log(
+      "\nYour transaction signature: ", tx,
+      "\nMetadata account: ", metadata_account.toBase58()
     )
   })
 });

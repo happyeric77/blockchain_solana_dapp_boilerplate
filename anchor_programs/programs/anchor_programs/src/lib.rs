@@ -7,16 +7,18 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use solana_program::program::{invoke_signed, invoke};
-use solana_program::system_instruction;
+use solana_program::{system_instruction, system_program};
+use metaplex_token_metadata::{self, state::{Creator, self, Metadata}};
 declare_id!("ArT6Hwus2hMwmNeNeJ2zGcQnvZsbrhz8vTbBdq35AdgG");
 
 #[program]
 pub mod anchor_programs {
     use super::*;
-    pub fn initialize(ctx: Context<Initialize>, price: u64) -> ProgramResult {
+    pub fn initialize(ctx: Context<Initialize>, price: u64, bump: u8) -> ProgramResult {
         ctx.accounts.nft_creator.price = price;
         ctx.accounts.nft_creator.total_minted = 0;
         ctx.accounts.nft_creator.collection = vec![];
+        ctx.accounts.create_nft_manager_pda_acc(bump)?;
         Ok(())
     }    
     
@@ -39,16 +41,52 @@ pub mod anchor_programs {
         ctx.accounts.mint_nft()?;
         Ok(())
     }
+
+    pub fn getmetadata(ctx: Context<GetMetadata>, bump: u8) -> ProgramResult {
+        ctx.accounts.get_metadata(bump)?;
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
+#[instruction(bump: u8)]
 pub struct Initialize<'info> {
-    #[account(init, payer=initializer, space=500)]                   
+    #[account(init, payer=initializer, space=101)]                   
     pub nft_creator: Account<'info, NftCreator>,
     #[account(mut, signer)]
     pub initializer: AccountInfo<'info>,
+    #[account(mut)]
+    pub nft_manager: AccountInfo<'info>,
     pub system_program: AccountInfo<'info>,
-    pub rent: Sysvar<'info, Rent>
+    pub nft_creater_program: AccountInfo<'info>,
+    pub rent: Sysvar<'info, Rent>,
+}
+
+impl<'info> Initialize<'info> {
+    fn create_nft_manager_pda_acc(&self, bump: u8) -> ProgramResult {
+        let seed = b"nft_manager5";
+        let manager_bump = Pubkey::find_program_address(
+            &[seed], 
+            self.nft_creater_program.key).1;
+        if manager_bump != bump {
+            return Err(ProgramError::Custom(99))
+        }
+        let ix = system_instruction::create_account(
+            self.initializer.key, 
+            self.nft_manager.key,
+            10000000, 
+            8*10,
+            self.nft_creater_program.key,
+        );
+        invoke_signed(
+            &ix, 
+            &[
+                self.initializer.clone(),
+                self.nft_manager.clone(),
+            ], &[&[ &seed.as_ref(), &[bump] ]]
+        )?;
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -89,6 +127,7 @@ impl<'info> InitNFT<'info> {
             // &[&[ &mint_seed.as_bytes()[..], &[*bump_seed] ]]
             &[&[ &mint_seed.as_ref(), &[*bump_seed] ]]
         )?; 
+        
         Ok(())
     }
     
@@ -149,6 +188,82 @@ impl <'info> MintNFT<'info> {
             self.minter_ata.to_account_info().clone(),
             self.minter.clone()
         ])?;
+        Ok(())
+    }
+}
+
+#[derive(Accounts)]
+#[instruction(bump: u8)]
+pub struct GetMetadata<'info>{
+    #[account(mut, signer)]
+    pub minter: AccountInfo<'info>,
+    #[account(mut)]
+    pub metadata_account: AccountInfo<'info>,
+    pub mint_pda_acc: Account<'info, Mint>,
+    pub nft_manager: AccountInfo<'info>,
+    pub metaplex_token_program: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>,
+}
+impl<'info> GetMetadata<'info> {
+    fn get_metadata(&self, bump: u8) -> ProgramResult {
+        msg!("TEST HERE");
+        let seeds = &[
+            state::PREFIX.as_bytes(),
+            &metaplex_token_metadata::id().to_bytes(),
+            &self.mint_pda_acc.key().to_bytes(),
+        ];
+        let creator = Creator {
+            address: self.minter.key(),
+            verified: true,
+            share: 100,
+        };
+        let (metadata_account, metadata_bump) = Pubkey::find_program_address(seeds, &metaplex_token_metadata::id());
+        if bump != metadata_bump {
+            return Err(ProgramError::Custom(0x99))
+        }
+        // msg!("{:?}",metadata_account.key());
+        // msg!("{:?}", metadata_bump);
+        let metadata_ix = metaplex_token_metadata::instruction::create_metadata_accounts(
+            metaplex_token_metadata::id(),
+            metadata_account.key(),
+            self.mint_pda_acc.key(),
+            self.minter.key(),
+            self.minter.key(),
+            self.minter.key(),
+            "1".to_string(),
+            "1".to_string(),
+            "1".to_string(),
+            Some(vec![creator]),
+            0,
+            true,
+            true,
+        );
+        invoke(&metadata_ix, &[
+            self.mint_pda_acc.to_account_info().clone(),
+            self.minter.clone(),
+            self.nft_manager.clone(),
+            self.metadata_account.clone(),
+            self.system_program.to_account_info().clone(),
+            self.rent.to_account_info().clone(),
+            self.metaplex_token_program.clone()
+        ])?;
+        // invoke_signed(&metadata_ix, &[
+        //     self.mint_pda_acc.to_account_info().clone(),
+        //     self.minter.clone(),
+        //     // self.nft_manager.clone(),
+        //     self.metadata_account.clone(),
+        //     self.rent.to_account_info().clone(),
+        //     self.metaplex_token_program.clone(),
+        //     self.system_program.to_account_info().clone(),
+        // ], &[&[ 
+        //     state::PREFIX.as_bytes(),
+        //     &metaplex_token_metadata::id().to_bytes(),
+        //     &self.mint_pda_acc.key().to_bytes(), 
+        //     &[bump] 
+        //     ]]
+        // )?;
+        
         Ok(())
     }
 }
