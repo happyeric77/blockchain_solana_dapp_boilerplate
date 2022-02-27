@@ -7,18 +7,20 @@ import { TOKEN_PROGRAM_ID, Token } from "@solana/spl-token";
 describe('anchor_programs', async() => {
 
   // Configure the client to use the local cluster.
-  anchor.setProvider(anchor.Provider.env());
-  const provider = anchor.Provider.env();
+  // anchor.setProvider(anchor.Provider.env());
+  // const provider = anchor.Provider.env();
+  
+  const conn = new Connection("https://rpc-mainnet-fork.dappio.xyz", { 
+    wsEndpoint: "wss://rpc-mainnet-fork.dappio.xyz/ws", 
+    commitment: "recent", 
+  });
+  const NodeWallet = require("@project-serum/anchor/src/nodewallet.js").default;
+  const wallet = NodeWallet.local();
+  const options = anchor.Provider.defaultOptions();
+  const provider = new anchor.Provider(conn, wallet, options);
+
   const program = anchor.workspace.AnchorPrograms as Program<AnchorPrograms>;
   
-  // const conn = new Connection("https://rpc-mainnet-fork.dappio.xyz", { 
-  //   wsEndpoint: "wss://rpc-mainnet-fork.dappio.xyz/ws", 
-  //   commitment: "recent", 
-  // });
-  // const NodeWallet = require("@project-serum/anchor/src/nodewallet.js").default;
-  // const wallet = NodeWallet.local();
-  // const options = anchor.Provider.defaultOptions();
-  // const provider = new anchor.Provider(conn, wallet, options);
                                                                                           /**@BaseAccounts */
   const nftCreatorAcc = anchor.web3.Keypair.generate();                                   // The nft creator state account
   
