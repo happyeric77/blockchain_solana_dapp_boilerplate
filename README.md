@@ -38,8 +38,10 @@ This boilerplate by default contains two built in context providers in ./pages/_
 1. WalletProvier is to take advantage of solana wallet adaptor
 2. ChakraProvider is to equip the project with [Chakra UI components](https://chakra-ui.com/docs/getting-started)
 
+## Custom hooks served with this boilerplate
+1. useDapp: serves some general functionality such as setLoading, setNotify and connection
+2. useAnchor: serves anchor frontend needed constants such as provider, program, signerWallet and some programIds.
 
 # TODO 
 
-1. Build in Anchor framework
-2. Dynamic adjusting exchange pool data
+1. Dynamic adjusting exchange pool data
