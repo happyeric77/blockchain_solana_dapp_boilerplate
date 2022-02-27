@@ -1,7 +1,5 @@
 import { useContext, createContext } from "react";
-import { Connection, clusterApiUrl, PublicKey, SystemProgram, Transaction } from '@solana/web3.js'
-import { AnchorPrograms } from '../anchor_programs/target/types/anchor_programs';
-import idl from '../anchor_programs/target/idl/anchor_programs.json'
+import { PublicKey,} from '@solana/web3.js'
 
 let AnchorContext = createContext<AnchorContextType>({
     provider: undefined,
