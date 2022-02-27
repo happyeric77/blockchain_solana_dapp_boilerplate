@@ -11,7 +11,8 @@ import Notify from '../common/Notify'
 import style from '../../styles/layout.module.sass'
 import useAnchor, { AnchorContext } from '../../hooks/useAnchor'
 import {Wallet} from '@project-serum/anchor/src/provider'
-import idl from '../../anchor_programs/target/idl/anchor_programs.json'
+// import idl from '../../anchor_programs/target/idl/anchor_programs.json'
+import idl from '../../public/anchor_programs.json'
 
 function Layout({...props}): JSX.Element {
 

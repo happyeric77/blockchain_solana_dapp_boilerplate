@@ -1,0 +1,259 @@
+{
+  "version": "0.1.0",
+  "name": "anchor_programs",
+  "instructions": [
+    {
+      "name": "initialize",
+      "accounts": [
+        {
+          "name": "nftCreator",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "initializer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "nftManager",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftCreaterProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "price",
+          "type": "u64"
+        },
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "initnft",
+      "accounts": [
+        {
+          "name": "minter",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "mintPdaAcc",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftCreater",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftCreaterProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bumpSeed",
+          "type": "u8"
+        },
+        {
+          "name": "mintSeed",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "mintnft",
+      "accounts": [
+        {
+          "name": "minter",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "mintPdaAcc",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "minterAta",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "nftCreator",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftCreatorProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "seed",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "getmetadata",
+      "accounts": [
+        {
+          "name": "minter",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "metadataAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mintPdaAcc",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "nftManager",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "metaplexTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "symbol",
+          "type": "string"
+        },
+        {
+          "name": "uri",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "NftCreator",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "collection",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "totalMinted",
+            "type": "u8"
+          },
+          {
+            "name": "price",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "AlreadyMinted",
+      "msg": "mintnft Error: this mint has already been minted"
+    },
+    {
+      "code": 6001,
+      "name": "ItemNotFound",
+      "msg": "Cannot find this item in NFT collection"
+    },
+    {
+      "code": 6002,
+      "name": "IncorrectNftManager",
+      "msg": "Input NFT manager account is not matched"
+    },
+    {
+      "code": 6003,
+      "name": "IncorrectMatadataAccount",
+      "msg": "Input metadata account is not matched"
+    }
+  ],
+  "metadata": {
+    "address": "ArT6Hwus2hMwmNeNeJ2zGcQnvZsbrhz8vTbBdq35AdgG"
+  }
+}
