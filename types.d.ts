@@ -1,7 +1,9 @@
 import { WalletContextState } from "@solana/wallet-adapter-react"
-import { Connection } from "@solana/web3.js"
+import { Connection, PublicKey } from "@solana/web3.js"
 import { AlertStatus } from "@chakra-ui/react";
-import { SetStateAction, Dispatch} from "react"
+import { SetStateAction, Dispatch, Provider} from "react"
+import { Program, Provider } from '@project-serum/anchor'
+import {Wallet} from '@project-serum/anchor/src/provider'
 
 declare global {
 
@@ -117,6 +119,14 @@ declare global {
         connection: Connection,
         setNotify: Dispatch<SetStateAction<INotify | null>>| null,
         setLoading: Dispatch<SetStateAction<LoadingType | null>>| null
+    }
+
+    type AnchorContextType = {
+        provider: Provider | undefined,
+        programId: PublicKey,
+        programStateAcc: PublicKey,
+        program: Program | undefined,
+        signerWallet: Wallet | undefined,
     }
 }
 export {}

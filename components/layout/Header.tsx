@@ -18,6 +18,7 @@ export default function Header() {
             <Link href="/my_spl">My SPL Tokens</Link>
             <Link href="/">Home</Link>
             <Link href="/exchange">Exchange</Link>
+            <Link href="/nft_creator">NFT Creator</Link>
             <WalletModalProvider>
                 {wallet.connected ? <WalletDisconnectButton /> : <WalletMultiButton />}
             </WalletModalProvider>

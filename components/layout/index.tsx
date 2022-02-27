@@ -2,13 +2,16 @@ import Head from 'next/head'
 import Header from "./Header"
 import { useWallet } from "@solana/wallet-adapter-react"
 import { Connection } from "@solana/web3.js"
+import { Program, Provider } from '@project-serum/anchor'
 import { getSPLTokenData } from "../../utils/web3"
 import { useEffect, useState } from "react"
 import { DappContext } from "../../hooks/useDapp"
-// import { Liquidity, LiquidityPoolKeysV4 } from '@raydium-io/raydium-sdk'
 import Loading from '../common/Loading'
 import Notify from '../common/Notify'
 import style from '../../styles/layout.module.sass'
+import useAnchor, { AnchorContext } from '../../hooks/useAnchor'
+import {Wallet} from '@project-serum/anchor/src/provider'
+import idl from '../../anchor_programs/target/idl/anchor_programs.json'
 
 function Layout({...props}): JSX.Element {
 
@@ -17,25 +20,45 @@ function Layout({...props}): JSX.Element {
         commitment: "processed"
     });
     // -->                                                                                // 3rd party Hooks
-    const wallet = useWallet();
+    const {publicKey, signTransaction, signAllTransactions} = useWallet()
+    const wallet = useWallet()
+    // -->                                                                                // Custom Hooks
+    const {programId, programStateAcc} = useAnchor()
 
     // -->                                                                                // React Hooks
     const [splTokenData, setSplTokenData] = useState<ISplToken[]>([]);
-    // const [poolKeys, setPoolKeys] = useState<LiquidityPoolKeysV4[]>([])
     const [notify, setNotify] = useState<INotify | null>(null);
     const [loading, setLoading] = useState<LoadingType | null>(null);
+    const [provider, setProvider] =  useState<Provider | undefined>(undefined);
+    const [program, setProgram] =  useState<Program | undefined> (undefined);
+    const [signerWallet, setSignerWallet] = useState<Wallet | undefined>(undefined);
+
+    //-->                                                                               Fetch signerWallet
+    useEffect(() => {
+        if ( publicKey && signTransaction && signAllTransactions) {
+            setSignerWallet({publicKey, signTransaction, signAllTransactions})
+        }
+    }, [publicKey, signTransaction, signAllTransactions])
+    //-->                                                                               Fetch Anchor Provider
+    useEffect(()=>{
+        if (signerWallet) {
+            setProvider(new Provider(connection, signerWallet, {preflightCommitment: "recent"}))
+        }
+    }, [signerWallet])
+    //-->                                                                               Fetch Anchor Program
+    useEffect(()=>{
+        if (provider) {
+            //@ts-ignore
+            setProgram(new Program(idl, programId, provider) as Program<AnchorPrograms>)
+        }
+    }, [provider])
+
 
     useEffect(()=>{                                                                       // Show notify component for 5s if there is any
         if (notify) {
             setTimeout(()=>setNotify(null), 5000)
         }
     }, [notify])
-
-    // useEffect(()=>{
-    //     Liquidity.fetchAllPoolKeys(connection).then((pools: LiquidityPoolKeysV4[])=>{
-    //         setPoolKeys(pools)
-    //     })
-    // }, [wallet.connected])
 
     useEffect(() => {
         if (wallet.connected) {
@@ -50,6 +73,9 @@ function Layout({...props}): JSX.Element {
             });
         } else {
             setSplTokenData([])
+            setSignerWallet(undefined)
+            setProvider(undefined)
+            setProgram(undefined)
         }
     }, [wallet.connected]);
 
@@ -74,7 +100,15 @@ function Layout({...props}): JSX.Element {
                 setNotify: setNotify,
                 setLoading: setLoading
             }}>
-                <main className={style.layoutContainer}>{props.children}</main>
+                <AnchorContext.Provider value={{
+                    signerWallet: signerWallet,
+                    provider: provider,
+                    programId: programId,
+                    program: program,
+                    programStateAcc: programStateAcc
+                }}>
+                    <main className={style.layoutContainer}>{props.children}</main>
+                </AnchorContext.Provider>
             </DappContext.Provider>
         </div>
     </>
