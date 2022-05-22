@@ -3,8 +3,7 @@ import { useRef, useState } from "react";
 import { useToken } from "../../store/tokenStore";
 
 export default function SearchToken() {
-  // const { tokenList, refreshTokens, isLoading, isFetching } = useToken();
-  const { data: tokenList, isLoading, isFetching } = useToken();
+  const { data: tokenList, isLoading } = useToken();
   const [selectedToken, setSelectedToken] = useState<TokenInfo>();
   const [filteredTokens, setFilteredTokens] = useState<TokenInfo[]>();
   const inputRef = useRef<HTMLInputElement>(null);
