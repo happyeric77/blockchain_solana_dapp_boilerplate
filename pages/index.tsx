@@ -1,11 +1,11 @@
-import type { NextPage } from 'next'
+import SearchToken from "../components/searchToken";
 
-
-
-const Home: NextPage = () => {
-
-  return <>
-  </>
+function Home() {
+  return (
+    <>
+      <SearchToken />
+    </>
+  );
 }
 
-export default Home
+export default Home;

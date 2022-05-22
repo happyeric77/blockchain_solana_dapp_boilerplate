@@ -24,6 +24,7 @@ export default function NftCreator() {
                 description: "Please login with your wallet"
             })
         } 
+        provider.connection.getProgramAccounts(program?.programId).then((data)=>console.log(data[1].pubkey.toBase58()))
     }, [])
 
     if (!signerWallet  || !program  || !provider ) {

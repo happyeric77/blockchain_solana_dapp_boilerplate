@@ -1,10 +1,13 @@
-import '../styles/globals.css'
-import type { AppProps } from 'next/app'
+import "../styles/globals.css";
+import type { AppProps } from "next/app";
 // import { Wallet } from '../components/common/WalletProvider'
-import { ChakraProvider } from '@chakra-ui/react'
-import Layout from '../components/layout'
+import { ChakraProvider } from "@chakra-ui/react";
+import Layout from "../components/layout";
 
-import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import {
   LedgerWalletAdapter,
@@ -13,9 +16,11 @@ import {
   SolflareWalletAdapter,
   SolletExtensionWalletAdapter,
   SolletWalletAdapter,
-  TorusWalletAdapter
+  TorusWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
-import { useMemo } from 'react'
+import { useMemo } from "react";
+// import { TokenProvider } from "../store/tokenStore";
+import { QueryClient, QueryClientProvider } from "react-query";
 // import { clusterApiUrl } from "@solana/web3.js";
 
 // Default styles that can be overridden by your app
@@ -32,27 +37,35 @@ function MyApp({ Component, pageProps }: AppProps) {
   // Only the wallets you configure here will be compiled into your application, and only the dependencies
   // of wallets that your users connect to will be loaded.
   const wallets = useMemo(
-      () => [
-          new PhantomWalletAdapter(),
-          new SlopeWalletAdapter(),
-          new SolflareWalletAdapter(),
-          new TorusWalletAdapter(),
-          new LedgerWalletAdapter(),
-          new SolletWalletAdapter({ network }),
-          new SolletExtensionWalletAdapter({ network })
-      ],
-      [network]
+    () => [
+      new PhantomWalletAdapter(),
+      new SlopeWalletAdapter(),
+      new SolflareWalletAdapter(),
+      new TorusWalletAdapter(),
+      new LedgerWalletAdapter(),
+      new SolletWalletAdapter({ network }),
+      new SolletExtensionWalletAdapter({ network }),
+    ],
+    [network]
   );
-  
-  return <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <ChakraProvider>
+
+  let queryClient = new QueryClient();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ConnectionProvider endpoint={endpoint}>
+        <WalletProvider wallets={wallets} autoConnect>
+          {/* <TokenProvider> */}
+          <ChakraProvider>
             <Layout>
               <Component {...pageProps} />
             </Layout>
           </ChakraProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+          {/* </TokenProvider> */}
+        </WalletProvider>
+      </ConnectionProvider>
+    </QueryClientProvider>
+  );
 }
 
-export default MyApp
+export default MyApp;
